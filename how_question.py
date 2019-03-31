@@ -238,17 +238,6 @@ gen_question_type1(txt)
 gen_question_type3(txt3)
 
 
-# In[145]:
 
-
-for sentence in parsed_sentense:
-    for chunk in get_namechunks(sentence):
-        if 'CARDINAL' in get_entity(chunk):
-            #print(chunk+'\n'+sentence)
-            start = sentence.find(chunk)
-            end = sentence.find(chunk) + len(chunk)
-            print(chunk+'\n'+sentence[0:start]+'\n'+sentence[end:])
-            print(get_entity(sentence[0:start]))
-            print(get_entity(sentence[end:]))
             
 
