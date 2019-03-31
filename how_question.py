@@ -238,6 +238,5 @@ gen_question_type1(txt)
 gen_question_type3(txt3)
 
 
-
             
 
