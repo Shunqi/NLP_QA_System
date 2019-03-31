@@ -84,14 +84,20 @@ def get_nsubj(sentence):
             return chunk.text
 
 
-# In[192]:
+# In[414]:
 
 
 def get_ROOT(sentence):
     doc = nlp(sentence)
     for token in doc:
         if token.dep_ == 'ROOT':
-            return token.text
+            return token.text, token.lemma_,token.tag_
+
+
+# In[416]:
+
+
+get_ROOT(txt)
 
 
 # In[122]:
@@ -117,7 +123,25 @@ def get_namechunks(sentence):
     return chunks
 
 
-# In[388]:
+# In[425]:
+
+
+def get_tense(verb_t):
+    # the verb is present third person singular
+    if verb_t == 'VBZ':
+        result = " does "
+    elif verb_t in ['VBP', 'VBG', 'VB']:
+        # tense = "present"
+        result = " do " 
+    elif verb_t in ['VBD', 'VBN']:
+        # tense = "past"
+        result = " did "
+    else:
+        result = ' does '
+    return result
+
+
+# In[421]:
 
 
 def gen_question_type1(sentence):
@@ -139,13 +163,14 @@ def gen_question_type1(sentence):
             if pp.upper().split()[0] == 'IN' and len(get_entity(pp))>0:
                 if get_entity(pp)[0] in ['GPE','FAC','ORG','LOC']:
                     loc = pp
+                    
     if subj != None:
-        return "How many "+obj+" does "+subj+" "+root.lower()+' '+prep.lower()+' '+loc+'?'
+        return "How many "+obj+get_tense(root[2])+subj+" "+root[1].lower()+' '+prep.lower()+' '+loc+'?'
     else:
-        return "How many "+obj+" were "+root.lower()+' '+prep.lower()+' '+loc+'?'
+        return "How many "+obj+" were "+root[0].lower()+' '+prep.lower()+' '+loc+'?'
 
 
-# In[363]:
+# In[419]:
 
 
 def gen_question_type2(sentence):
@@ -163,7 +188,7 @@ def gen_question_type2(sentence):
     return "How many "+obj+" are there "+prep.lower()+'?'
 
 
-# In[364]:
+# In[420]:
 
 
 def gen_question_type3(sentence):
@@ -185,7 +210,7 @@ def gen_question_type3(sentence):
             if pp.upper().split()[0] == 'IN' and len(get_entity(pp))>0:
                 if get_entity(pp)[0] in ['GPE','FAC','ORG','LOC']:
                     loc = pp
-    return "How much "+obj+" does "+subj+" "+root+' '+prep.lower()+' '+loc+'?'
+    return "How much "+obj+get_tense(root[2])+subj+" "+root[1].lower()+' '+prep.lower()+' '+loc+'?'
 
 
 # In[237]:
@@ -202,41 +227,64 @@ def get_pps(sentence):
     return pps
 
 
-# In[390]:
+# In[393]:
+
+
+temp = dep_dict.get("ROOT")
+root_word = temp[0]  # the root word
+verb = temp[1]  # the pos tag of the root word
+
+# find the original word in word_Pos dict
+verb_s = word_Pos.get(root_word)[0]
+
+
+# In[408]:
 
 
 txt = "Each year, the southern California area has about 10,000 earthquakes"
 
 
-# In[329]:
+# In[409]:
 
 
 txt2 ="In southern California there are also twelve cities with more than 200,000 residents and 34 cities over 100,000 in population."
 
 
-# In[369]:
+# In[410]:
 
 
 txt3 = "Booth donated $300 million to the university's Booth School of Business"
 
 
-# In[366]:
+# In[422]:
 
 
 gen_question_type2(txt2)
 
 
-# In[391]:
+# In[423]:
 
 
 gen_question_type1(txt)
 
 
-# In[370]:
+# In[424]:
 
 
 gen_question_type3(txt3)
 
 
+# In[145]:
+
+
+for sentence in parsed_sentense:
+    for chunk in get_namechunks(sentence):
+        if 'CARDINAL' in get_entity(chunk):
+            #print(chunk+'\n'+sentence)
+            start = sentence.find(chunk)
+            end = sentence.find(chunk) + len(chunk)
+            print(chunk+'\n'+sentence[0:start]+'\n'+sentence[end:])
+            print(get_entity(sentence[0:start]))
+            print(get_entity(sentence[end:]))
             
 
