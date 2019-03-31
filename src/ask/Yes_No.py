@@ -1,4 +1,5 @@
 # the inputs are the original sentence and its POS tag list
+
 def create_YN(sentence, word_Pos, Pos_word, dep_dict):
     '''
     retract the VERB pos and check if it's be verb (is, are, were, was)
@@ -39,8 +40,9 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
 
     # check the type of first word, if it's not proper noun, convert to lower case
     first_word = str(tokens[0])
+    first_word_tag = word_Pos.get(first_word)[2]  # the tag of the first word
 
-    if verb != "NNP":
+    if first_word_tag != "NNP" and first_word_tag != "PRP":
         first_word_lower = first_word.lower()
         sentence = sentence.replace(first_word, first_word_lower)
     # replace the verb with original word
@@ -51,7 +53,7 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
     if verb == 'VBZ':
         result = "Does " + sentence + "?"
 
-    if verb_s in ['VBP', 'VBG', 'VB']:
+    if verb in ['VBP', 'VBG', 'VB']:
         # tense = "present"
         result = "Do " + sentence + "?"
 
@@ -59,7 +61,7 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
     if verb_s in ['VBF','VBC']:
         #tense = "future"
         '''
-    if verb_s in ['VBD', 'VBN']:
+    if verb in ['VBD', 'VBN']:
         # tense = "past"
         result = "Did " + sentence + "?"
 
