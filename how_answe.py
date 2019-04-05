@@ -16,7 +16,7 @@ nltk.download('stopwords')
 nlp = spacy.load("en_core_web_lg")
 
 
-# In[225]:
+# In[238]:
 
 
 q = "How many combinatory and graph theoretical problems, formerly believed to be plagued by intractability, did Karp's paper address?"
@@ -47,13 +47,13 @@ def locate_cardinal(sentence):
     return cardinal
 
 
-# In[235]:
+# In[245]:
 
 
 def locate_cardinal2(sentence):
     cardinal = []
     for en in get_entity(sentence):
-        if en[1] in ['CARDINAL', 'QUANTITY','PERCENT']:
+        if en[1] in ['CARDINAL', 'QUANTITY','PERCENT','MONEY']:
             cardinal.append(en[0])
     return cardinal
 
@@ -88,27 +88,31 @@ def calculate_word_distance(lemma, card, sentence):
         return abs(card_idx - obj_idx)
 
 
-# In[236]:
+# In[252]:
 
 
 def answer_how(question, sentence):
     noun = get_noun(question)
-    noun_lemma = get_lemma(noun)
-    if 'how much' in question.lower():
+    if noun is None:
         card_list = locate_cardinal2(sentence)
+        return card_list[0]
     else:
-        card_list = locate_cardinal(sentence)
-    min_dist = 9999
-    answer = ''
-    for card in card_list:
-        #print(card)
-        dist = calculate_word_distance(noun_lemma, card, sentence)
-        #print(dist)
-        if dist < min_dist:
-            min_dist = dist
-            answer = card
-            #print(answer)
-    return answer
+        noun_lemma = get_lemma(noun)
+        if 'how much' in question.lower():
+            card_list = locate_cardinal2(sentence)
+        else:
+            card_list = locate_cardinal(sentence)
+        min_dist = 9999
+        answer = ''
+        for card in card_list:
+            #print(card)
+            dist = calculate_word_distance(noun_lemma, card, sentence)
+            #print(dist)
+            if dist < min_dist:
+                min_dist = dist
+                answer = card
+                #print(answer)
+        return answer
 
 
 # In[222]:
@@ -121,7 +125,7 @@ def get_noun(sentence):
             return token.text
 
 
-# In[226]:
+# In[239]:
 
 
 answer_how(q, sentence)
@@ -135,21 +139,15 @@ answer_how(q, sentence)
 #2. how much + noun
 
 
-# In[231]:
+# In[246]:
 
 
-q = "How much does Victoria produce in Australian pears?"
-sentence = "Victorian farms produce nearly 90% of Australian pears and third of apples."
+q = "How much did Andrew donate in 1900 ?"
+sentence = "In 1900, Andrew donated $1 million for the creation of a technical institute for the city of Pittsburgh."
 
 
-# In[237]:
+# In[253]:
 
 
 answer_how(q, sentence)
-
-
-# In[234]:
-
-
-get_entity(sentence)
 
