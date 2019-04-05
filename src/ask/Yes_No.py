@@ -31,14 +31,27 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
         print(synonyms)
         print(antonyms)
 
-        if num > 5:  # change to antonyms
+        if num > 5 and antonyms:  # change to antonyms
             sentence = sentence.replace(word, antonyms[0])
-        elif 5 >= num:  # change to synonyms
-            sentence = sentence.replace(word, synonyms[1])
+        elif 5 >= num and synonyms:  # change to synonyms
+            sentence = sentence.replace(word, synonyms[0])
 
     tokens = nlp(sentence)
     # check the type of first word, if it's not proper noun, convert to lower case
     first_word = str(tokens[0])
+
+    # find the root word
+    temp = dep_dict.get("ROOT")
+    root_word = temp[0]  # the root word
+    verb = temp[1]  # the pos tag of the root word
+    if root_word in be_words:
+        if first_word != "I":
+            first_word_lower = first_word.lower()
+            sentence = sentence.replace(first_word, first_word_lower)
+        sentence = sentence.replace(str(tokens[-1]), "")
+        sentence = sentence.replace(root_word + " ", "")
+        result = root_word.capitalize() + " " + sentence + "?"
+        return result
 
     for x in tokens:
         x = str(x)
@@ -53,13 +66,8 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
             return result
 
     # there is no be_words, check what is the tense of the sentence
-    temp = dep_dict.get("ROOT")
-    root_word = temp[0]  # the root word
-    verb = temp[1]  # the pos tag of the root word
-
     # find the original word in word_Pos dict
     verb_s = word_Pos.get(root_word)[0]
-    print(verb_s)
 
     first_word_tag = word_Pos.get(first_word)[2]  # the tag of the first word
     print(first_word_tag)
