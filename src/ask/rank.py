@@ -1,3 +1,4 @@
+import nltk
 from nltk import word_tokenize, pos_tag
 from nltk.corpus import wordnet as wn
 
@@ -28,7 +29,6 @@ def calculate_distance(s1, s2):
 
     return distance
 
-
 def remove_stopwords(s):
     # remove stopwords
     stopwords = nltk.corpus.stopwords.words("english")
@@ -37,7 +37,6 @@ def remove_stopwords(s):
     filtered_sentence = [w.strip() for w in word_tokens if w not in stopwords]
     text = " ".join(str(x) for x in filtered_sentence)
     return text
-
 
 def score(sentence, question, type, replace):
     score = 0
