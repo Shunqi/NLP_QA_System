@@ -47,6 +47,17 @@ def locate_cardinal(sentence):
     return cardinal
 
 
+# In[235]:
+
+
+def locate_cardinal2(sentence):
+    cardinal = []
+    for en in get_entity(sentence):
+        if en[1] in ['CARDINAL', 'QUANTITY','PERCENT']:
+            cardinal.append(en[0])
+    return cardinal
+
+
 # In[138]:
 
 
@@ -77,13 +88,16 @@ def calculate_word_distance(lemma, card, sentence):
         return abs(card_idx - obj_idx)
 
 
-# In[221]:
+# In[236]:
 
 
 def answer_how(question, sentence):
     noun = get_noun(question)
     noun_lemma = get_lemma(noun)
-    card_list = locate_cardinal(sentence)
+    if 'how much' in question.lower():
+        card_list = locate_cardinal2(sentence)
+    else:
+        card_list = locate_cardinal(sentence)
     min_dist = 9999
     answer = ''
     for card in card_list:
@@ -111,4 +125,31 @@ def get_noun(sentence):
 
 
 answer_how(q, sentence)
+
+
+# In[ ]:
+
+
+#HOW MUCH QUESTION
+#1. how much + verb
+#2. how much + noun
+
+
+# In[231]:
+
+
+q = "How much does Victoria produce in Australian pears?"
+sentence = "Victorian farms produce nearly 90% of Australian pears and third of apples."
+
+
+# In[237]:
+
+
+answer_how(q, sentence)
+
+
+# In[234]:
+
+
+get_entity(sentence)
 
