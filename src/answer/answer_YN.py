@@ -20,10 +20,13 @@ def answer_YN(s, q):
     for token in doc_q:
         if token.tag_ == "JJ":  # there is an adjective word
             JJ_word_q.append(token.text)
+        else:  # there is no adjective word
+            if count % 2 == 0:
+                return "Yes"
+            else:
+                return "No"
 
     for i, word in enumerate(JJ_word_q):
-        print(s)
-        print(i)
         if word in s:  # if the original sentence contains this word
             if count % 2 == 0:
                 return "Yes"
@@ -44,16 +47,3 @@ def answer_YN(s, q):
                     return "No"
                 else:
                     return "Yes"
-
-
-def word_net(word):  # input is a word
-    synonyms = []
-    antonyms = []
-
-    for syn in wn.synsets(word, pos=wn.ADJ):
-        for l in syn.lemmas():
-            synonyms.append(l.name())
-            if l.antonyms():
-                antonyms.append(l.antonyms()[0].name())
-
-    return synonyms, antonyms
