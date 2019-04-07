@@ -1,36 +1,12 @@
 # the inputs are the original sentence and its POS tag list
+import random
+
 
 def create_YN(sentence, word_Pos, Pos_word, dep_dict):
     result = ""  # the string to return
     tense = ""  # the tense of the sentence
     be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have',
                 'had', 'has']
-
-    # the function to change syn and ant words
-    Adj_words = []
-    # find all the adj words
-    if "JJ" in Pos_word:
-        temp = Pos_word.get("JJ")
-        status = isinstance(temp, list)
-        if status == False:
-            Adj_words.append(temp)
-        else:
-            Adj_words.extend(temp)
-
-    '''
-    print(Adj_words)
-    num = random.randint(1,10)'''
-
-    # create synonyms and antonyms
-    for word in Adj_words:
-        wordnet = word_net(word)
-        synonyms = wordnet[0]
-        antonyms = wordnet[1]
-
-        if antonyms:  # change to antonyms
-            sentence = sentence.replace(word, antonyms[0])
-        elif synonyms:  # change to synonyms
-            sentence = sentence.replace(word, synonyms[0])
 
     tokens = nlp(sentence)
 
@@ -45,6 +21,28 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
         sentence = sentence.replace(str(tokens[-1]), "")
 
     first_word_tag = word_Pos.get(first_word)[2]  # the tag of the first word
+
+    # the function to change syn and ant words
+    Adj_words = []
+    # find all the adj words
+    if "JJ" in Pos_word:
+        temp = Pos_word.get("JJ")
+        status = isinstance(temp, list)
+        if status == False:
+            Adj_words.append(temp)
+        else:
+            Adj_words.extend(temp)
+
+    # create synonyms and antonyms
+    for word in Adj_words:
+        wordnet = word_net(word)
+        synonyms = wordnet[0]
+        antonyms = wordnet[1]
+
+        if antonyms:  # change to antonyms
+            sentence = sentence.replace(word, antonyms[0])
+        elif synonyms:  # change to synonyms
+            sentence = sentence.replace(word, synonyms[0])
 
     if first_word_tag != "NNP" and first_word != "I":
         first_word_lower = first_word.lower()
