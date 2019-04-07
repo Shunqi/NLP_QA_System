@@ -14,10 +14,10 @@ def main():
     sentences = tokenize_sentence(paragraphs)
     count = 0
     qList = []
-    logfile = open('log.txt', 'w')
+    # logfile = open('log.txt', 'w')
     for i in range(0, len(sentences)):
         sentence = sentences[i]
-        print(sentence, file=logfile)
+        # print(sentence, file=logfile)
         senList1 = extract_bracket(sentence)
         senList2 = []
         for s in senList1:
