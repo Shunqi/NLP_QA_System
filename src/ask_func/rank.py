@@ -41,7 +41,7 @@ def remove_stopwords(s):
 def score(sentence, question, type, replace):
     score = 0
     score += sentence_similarity(sentence, question)
-    print(score)
+    # print(score)
     return score
 
 def penn_to_wn(tag):

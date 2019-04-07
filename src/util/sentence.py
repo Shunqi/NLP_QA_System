@@ -63,12 +63,14 @@ def get_nsubj(sentence):
     for chunk in doc.noun_chunks:
         if chunk.root.dep_ == 'nsubj':
             return chunk.text
+    return ''
 
 def get_ROOT(sentence):
     doc = nlp(sentence)
     for token in doc:
         if token.dep_ == 'ROOT':
             return token.text, token.lemma_,token.tag_
+    return ''
 
 def get_entity(sentences):
     entity = []

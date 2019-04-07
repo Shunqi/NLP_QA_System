@@ -22,10 +22,13 @@ def answer_YN(s, q):
     for token in doc_q:
         if token.tag_ == "JJ":  # there is an adjective word
             JJ_word_q.append(token.text)
+        else:  # there is no adjective word
+            if count % 2 == 0:
+                return "Yes"
+            else:
+                return "No"
 
     for i, word in enumerate(JJ_word_q):
-        # print(s)
-        # print(i)
         if word in s:  # if the original sentence contains this word
             if count % 2 == 0:
                 return "Yes"
@@ -60,7 +63,9 @@ def word_net(word):  # input is a word
 
     return synonyms, antonyms
 
-def answer_what(sentence, question, dependency, pas, word_Pos, dep_dict):
+def answer_what(sentence, question):
+    dependency, pas = stanford_parser(sentence)
+    word_Pos, _, _, dep_dict = Spacy_parser(sentence)
     # there is no be_words, check what is the tense of the sentence
     temp = dep_dict.get("ROOT")
     root_word = temp[0]  # the root word

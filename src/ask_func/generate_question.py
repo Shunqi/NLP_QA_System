@@ -3,12 +3,27 @@ sys.path.append('../')
 from util.sentence import *
 from util.parse_json import parse_json_sentences
 import random
-from answer.answer_question import *
+from answer_func.answer_question import *
 
 def create_YN(sentence, word_Pos, Pos_word, dep_dict):
     result = ""  # the string to return
     tense = ""  # the tense of the sentence
-    be_words = ['is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have', 'had', 'has']
+    be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have',
+                'had', 'has']
+
+    tokens = nlp(sentence)
+
+    # check the type of first word, if it's not proper noun, convert to lower case
+    first_word = str(tokens[0])
+    while (first_word == " "):
+        sentence = sentence.replace(first_word, "", 1)
+        tokens = tokens[1:]
+        first_word = str(tokens[0])
+
+    if str(tokens[-1]) == '.':
+        sentence = sentence.replace(str(tokens[-1]), "")
+
+    first_word_tag = word_Pos.get(first_word)[2]  # the tag of the first word
 
     # the function to change syn and ant words
     Adj_words = []
@@ -21,49 +36,37 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
         else:
             Adj_words.extend(temp)
 
-    # print(Adj_words)
-    num = random.randint(1, 10)
-
     # create synonyms and antonyms
     for word in Adj_words:
-        # print(word)
         wordnet = word_net(word)
         synonyms = wordnet[0]
         antonyms = wordnet[1]
 
-        # print(synonyms)
-        # print(antonyms)
-
-        if num > 5 and antonyms:  # change to antonyms
+        if antonyms:  # change to antonyms
             sentence = sentence.replace(word, antonyms[0])
-        elif 5 >= num and synonyms:  # change to synonyms
+        elif synonyms:  # change to synonyms
             sentence = sentence.replace(word, synonyms[0])
 
-    tokens = nlp(sentence)
-    # check the type of first word, if it's not proper noun, convert to lower case
-    first_word = str(tokens[0])
+    if first_word_tag != "NNP" and first_word != "I":
+        first_word_lower = first_word.lower()
+        sentence = sentence.replace(first_word, first_word_lower)
 
     # find the root word
     temp = dep_dict.get("ROOT")
     root_word = temp[0]  # the root word
     verb = temp[1]  # the pos tag of the root word
     if root_word in be_words:
-        if first_word != "I":
-            first_word_lower = first_word.lower()
-            sentence = sentence.replace(first_word, first_word_lower)
-        sentence = sentence.replace(str(tokens[-1]), "")
         sentence = sentence.replace(root_word + " ", "")
+        if root_word == "cannot":
+            root_word = "can"
         result = root_word.capitalize() + " " + sentence + "?"
         return result
 
     for x in tokens:
         x = str(x)
         if x in be_words:  # find the first verb and return the sentence
-            if first_word != "I":
-                first_word_lower = first_word.lower()
-                sentence = sentence.replace(first_word, first_word_lower)
-
-            sentence = sentence.replace(str(tokens[-1]), "")
+            if "cannot" in sentence and x == 'can':
+                sentence = sentence.replace("cannot" + " ", "")
             sentence = sentence.replace(x + " ", "")
             result = x.capitalize() + " " + sentence + "?"
             return result
@@ -72,15 +75,8 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
     # find the original word in word_Pos dict
     verb_s = word_Pos.get(root_word)[0]
 
-    first_word_tag = word_Pos.get(first_word)[2]  # the tag of the first word
-    # print(first_word_tag)
-
-    if first_word_tag != "NNP" and first_word != "I":
-        first_word_lower = first_word.lower()
-        sentence = sentence.replace(first_word, first_word_lower)
     # replace the verb with original word
     sentence = sentence.replace(root_word, verb_s, 1)
-    sentence = sentence.replace(str(tokens[-1]), "")
 
     # the verb is present third person singular
     if verb == 'VBZ':
@@ -115,11 +111,13 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
     verb = ''
     aux = ''
     auxpass = ''
+    keyword_tag = ''
     for i in range(len(dependency)):
         # print(dependency[i])
         if (dependency[i][1] == 'cop'):
             keyword = dependency[i][0][0]
             copula = dependency[i][2][0]
+            keyword_tag = dependency[i][0][1]
             break
     if keyword == '':
         for i in range(len(dependency)):
@@ -127,9 +125,10 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
             if (dependency[i][1] == 'dobj'):
                 keyword = dependency[i][2][0]
                 verb = dependency[i][0][0]
+                keyword_tag = dependency[i][2][1]
                 break
 
-    if verb != root_word and root_word != keyword:
+    if copula == '' and verb != root_word and root_word != keyword and 'VB' in tag:
         keyword = ''
     if keyword == '':
         verb = root_word
@@ -147,11 +146,15 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
  
     keyphrase = None
     if keyword != '':
+        if 'VB' in keyword_tag:
+            label = 'VP'
+        else:
+            label = 'NP'
         for s in pas.subtrees():
             # s.pretty_print()
             # print(s.label())
             # print(s.leaves())
-            if s.label() == 'NP' and keyword in s.leaves() and keyphrase == None:
+            if s.label() == label and keyword in s.leaves() and keyphrase == None:
                 keyphrase = s.leaves()
     elif verb != '':
         for s in pas.subtrees():
@@ -180,11 +183,18 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
         if sentence[obj_index - 2] == ',':
             obj_index -= 1
         question = sentence[:obj_index-1]
-        # replace the verb with original word
-        question = question.replace(verb, verb_s, 1)
+        
         if aux != '':
-            question = 'What ' + aux + ' ' + question + '?'
+            obj_index = sentence.find(aux)
+            question = sentence[:obj_index-1]
+            question = 'What ' + aux + ' ' + question + ' ' + verb + '?'
+        elif auxpass != '':
+            obj_index = sentence.find(auxpass)
+            question = sentence[:obj_index-1]
+            question = 'What ' + auxpass + ' ' + question + ' ' + verb + '?'
         else:
+            # replace the verb with original word
+            question = question.replace(verb, verb_s, 1)
             do_tense = get_tense(tag)
             question = 'What' + do_tense + question + '?'
         return question
@@ -230,23 +240,17 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
     #Question Type2 : There is/are + number + noun + in + place
     #Question type3: noun + with + number + noun phrase
     #被动句
-def gen_question_type1(sentence):
+def gen_question_type1(sentence,obj):
     root = get_ROOT(sentence)
     subj =get_nsubj(sentence)
-    obj = ''
-    for chunk in get_namechunks(sentence).keys():
-        #print(chunk)
-        if 'CARDINAL' in get_entity(chunk) or 'QUANTITY' in get_entity(chunk):
-            obj = get_namechunks(sentence)[chunk]
-            #obj = chunk.split()[-1]
     prep = ''
     loc = ''
     if len(get_pps(sentence)) > 0:
         for pp in get_pps(sentence):
             if pp.upper().split()[0] in ['DURING','IN','WHITIN','FROM','UNTIL'] and len(get_entity(pp))>0:
-                if 'CARDINAL' in get_entity(pp) or 'DATE' in get_entity(pp) or 'TIME' in get_entity(pp):
+                if 'DATE' in get_entity(pp) or 'TIME' in get_entity(pp): #'CARDINAL' in get_entity(pp) or
                     prep = pp
-            if pp.upper().split()[0] == 'IN' and len(get_entity(pp))>0:
+            if (pp.upper().split()[0] == 'IN' or pp.upper().split()[0] == 'ON' or pp.upper().split()[0] == 'AT') and len(get_entity(pp))>0:
                 if get_entity(pp)[0] in ['GPE','FAC','ORG','LOC']:
                     loc = pp
                     
@@ -255,11 +259,7 @@ def gen_question_type1(sentence):
     else:
         return "How many "+obj+" were "+root[0].lower()+' '+prep.lower()+' '+loc+'?'
 
-def gen_question_type2(sentence):
-    obj = ''
-    for chunk in get_namechunks(sentence).keys():
-        if 'CARDINAL' in get_entity(chunk) or 'QUANTITY' in get_entity(chunk):
-            obj = get_namechunks(sentence)[chunk]
+def gen_question_type2(sentence,obj):
     prep = ''
     if len(get_pps(sentence)) > 0:
         for pp in get_pps(sentence):
@@ -269,15 +269,13 @@ def gen_question_type2(sentence):
 
     return "How many "+obj+" are there "+prep.lower()+'?'
 
-def gen_question_type3(sentence):
+def gen_question_type3(sentence,obj):
     root = get_ROOT(sentence)
     subj =get_nsubj(sentence)
-    obj = ''
-    for chunk in get_namechunks(sentence).keys():
-        if 'CARDINAL' in get_entity(chunk) or 'QUANTITY' in get_entity(chunk):
-            obj = get_namechunks(sentence)[chunk]
-
-            #obj = chunk.split()[-1]
+    if obj == '' and root == '' :
+        return ''
+    if obj == '' and subj == '' :
+        return ''
     prep = ''
     loc = ''
     if len(get_pps(sentence)) > 0:
@@ -285,9 +283,10 @@ def gen_question_type3(sentence):
             if pp.upper().split()[0] in ['DURING','IN','WHITIN','FROM','UNTIL'] and len(get_entity(pp))>0:
                 if 'CARDINAL' in get_entity(pp) or 'DATE' in get_entity(pp) or 'TIME' in get_entity(pp):
                     prep = pp
-            if pp.upper().split()[0] == 'IN' and len(get_entity(pp))>0:
+            if (pp.upper().split()[0] == 'IN' or pp.upper().split()[0] == 'ON') and len(get_entity(pp))>0:
                 if get_entity(pp)[0] in ['GPE','FAC','ORG','LOC']:
                     loc = pp
+
     return "How much "+obj+get_tense(root[2])+subj+" "+root[1].lower()+' '+prep.lower()+' '+loc+'?'
 
 def create_when(sentence):
@@ -344,11 +343,43 @@ def create_when(sentence):
     return questions
 
 def create_how(sentence):
-    words = sentence.split(' ')
-    if 'there' in words:
-        return gen_question_type1(sentence)
+    return select_question(sentence)
+
+def countable_noun(noun):
+    url = 'https://books.google.com/ngrams/graph?content=many+' + noun + '%2C+much+' + noun + '&year_start=1800&year_end=2000'
+    response = urllib.request.urlopen(url)
+    html = response.read().decode('utf-8')
+
+    try:
+        many_data = json.loads(re.search('\{"ngram": "many ' + noun + '".*?\}', html).group(0))['timeseries']
+        many = sum(many_data) / float(len(many_data))
+    except:
+        many = 0.0
+    try:
+        much_data = json.loads(re.search('\{"ngram": "much ' + noun + '".*?\}', html).group(0))['timeseries']
+        much = sum(much_data) / float(len(much_data))
+    except:
+        much = 0.0
+    if many > much:
+        return True
+    return False
+
+def select_question(sentence):
+    obj = ''
+    for chunk in get_namechunks(sentence).keys():
+        if 'CARDINAL' in get_entity(chunk) or 'QUANTITY' in get_entity(chunk):
+            obj = get_namechunks(sentence)[chunk]
+
+    if obj == '':
+        return gen_question_type3(sentence, obj)
+    
+    if countable_noun(obj):
+        if 'there' in sentence.lower():
+            return gen_question_type2(sentence, obj)
+        else:
+            return gen_question_type1(sentence, obj)
     else:
-        return gen_question_type2(sentence)
+        return gen_question_type3(sentence, obj)
 
 def checkValidSentence(sentence):
     dependency, pas = stanford_parser(sentence)
@@ -373,21 +404,21 @@ def extract_bracket(sentence):
     for i in range(len(left)):
         oldSentence += sentence[start:left[i] - 1]
         start = right[i] + 1
-        brackSentence = sentence[left[i] + 1:right[i]] + '.'
-        if checkValidSentence(brackSentence):
-            senList.append(brackSentence)
+        # brackSentence = sentence[left[i] + 1:right[i]] + '.'
+        # if checkValidSentence(brackSentence):
+        #     senList.append(brackSentence)
     oldSentence += sentence[start:]
     senList.append(oldSentence)
     return senList
 
-def break_simple_and(sentence):
+def break_simple_andbut(sentence, andORbut):
     senList = []
-    position = sentence.find(', and ')
+    position = sentence.find(', ' + andORbut + ' ')
     if position == -1:
         senList.append(sentence)
         return senList
     s1 = sentence[:position] + '.'
-    s2 = sentence[position+len(', and '):]
+    s2 = sentence[position+len(', ' + andORbut + ' '):]
     dependency, pas = stanford_parser(s2)
     if checkValidSentence(s2):
         dependency1, pas1 = stanford_parser(s1)
@@ -442,7 +473,7 @@ def main():
         senList1 = extract_bracket(sentence)
         senList = []
         for s in senList1:
-            senList += break_simple_and(s)
+            senList += break_simple_andbut(s, 'and')
         sList = []
         qList = []
         aList = []
