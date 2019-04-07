@@ -1,12 +1,13 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import sys
-
-filename = sys.argv[1]
-n_question = sys.argv[2]
-
 import os
-os.chdir("src/ask/")
+from src.test import test
 
-from src.ask import generate_question
+if __name__ == "__main__":
+    input_file = sys.argv[1]
+    n_questions = sys.argv[2]
+    print("answering...")
+    
+    os.chdir("src/ask/")
 
-generate_question.main()
+    test.main()

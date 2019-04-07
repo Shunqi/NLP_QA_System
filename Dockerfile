@@ -9,7 +9,7 @@ RUN apt-get -y update && \
     apt-get -y install python3-pip python3-dev
 
 
-RUN pip3 install spacy && \
+RUN pip3 install spacy=="2.0.12" && \
     pip3 install nltk && \
     pip3 install numpy && \
     pip3 install gensim 
@@ -25,11 +25,11 @@ ADD answer /QA
 ADD ask /QA
 ADD src /QA
 
-# Set working dir as /QA
-WORKDIR /QA
-
 # Change the permissions of programs, you may add other command if needed
 CMD ["chmod 777 ask"]
 CMD ["chmod 777 answer"]
+
+# Set working dir as /QA
+WORKDIR /QA
 
 # ENTRYPOINT ["/bin/bash", "-c"]
