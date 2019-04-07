@@ -1,5 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 import sys
 
 filename = sys.argv[1]
 n_question = sys.argv[2]
+
+import os
+os.chdir("src/ask/")
+
+from src.ask import generate_question
+
+generate_question.main()

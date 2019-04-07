@@ -1,5 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 import sys
 
 input_file = sys.argv[1]
 output_file = sys.argv[2]
+
+import os
+os.chdir("src/ask/")
+
+from src.test import test
+
+test.main()
