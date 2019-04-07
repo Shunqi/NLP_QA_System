@@ -4,7 +4,6 @@ from collections import Counter
 import spacy
 import pandas as pd
 
-
 os.environ['STANFORD_PARSER'] = '../stanford-parser-full-2018-10-17/stanford-parser.jar'
 os.environ['STANFORD_MODELS'] = '../stanford-parser-full-2018-10-17/stanford-parser-3.9.2-models.jar'
 pcfg_parser = stanford.StanfordParser(model_path='../stanford-parser-full-2018-10-17/englishPCFG.ser.gz')
