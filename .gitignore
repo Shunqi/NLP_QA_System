@@ -1,3 +1,4 @@
 stanford-parser-full-2018-10-17/
 .DS_Store
 data/
+__pycache__/
