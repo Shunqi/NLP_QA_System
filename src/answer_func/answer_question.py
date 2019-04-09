@@ -225,16 +225,19 @@ def answer_when(candidate, question):
         for ent in doc.ents:
             if ent.label_ in ["LOCATION", "GPE"]:
                 return ent.text
+        return candidate
 
     elif question_type == "when":
         for ent in doc.ents:
             if ent.label_ in ["DATE", "TIME"]:
                 return ent.text
+        return candidate
 
     elif question_type == "who":
         for ent in doc.ents:
             if ent.label_ in ["PERSON"]:
                 return ent.text
+        return candidate
 
     else:
         return candidate
