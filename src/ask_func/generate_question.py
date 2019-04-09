@@ -299,6 +299,7 @@ def create_when(sentence):
 
     questions = []
 
+    verb = ""
     for i in range(len(doc)):
         token = doc[i]
         if token.pos_ == "VERB":
@@ -329,7 +330,9 @@ def create_when(sentence):
 
         if question_type != "":
             # print(ent.text, nsubj)
-            if verb.dep_ != "aux" and ent.text != nsubj:
+            if type(verb) == str:
+                continue
+            elif verb.dep_ != "aux" and ent.text != nsubj:
                 if verb.tag_ == "VBD":
                     question_verb = "did"
                 else:

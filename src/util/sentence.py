@@ -2,8 +2,6 @@ import os
 from nltk.parse import stanford
 from collections import Counter
 import spacy
-import pandas as pd
-import language_check
 
 os.environ['STANFORD_PARSER'] = '../stanford-parser-full-2018-10-17/stanford-parser.jar'
 os.environ['STANFORD_MODELS'] = '../stanford-parser-full-2018-10-17/stanford-parser-3.9.2-models.jar'
