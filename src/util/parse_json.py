@@ -21,7 +21,7 @@ def parse_json_sentences():
         return result
 
 def read_squad(filename):
-    with open(filename) as json_data:
+    with open(filename,  encoding="utf8") as json_data:
         content = json.load(json_data)
         json_data.close()
     #parse json into a list of paragraphs
@@ -32,7 +32,7 @@ def read_squad(filename):
     return para
 
 def open_html(filename):
-    soup = BeautifulSoup(open(filename), "html.parser")
+    soup = BeautifulSoup(open(filename,  encoding="utf8"), "html.parser")
     page = soup.find_all('p')
     paragraphs = ''
     for p in page:
@@ -40,7 +40,7 @@ def open_html(filename):
     return paragraphs
 
 def open_txt(filename):
-    textfile = open(filename, 'r')
+    textfile = open(filename, 'r', encoding="utf8")
     lines_txt = [line.rstrip("\n") for line in textfile]
     textfile.close()
     paragraphs = ''
@@ -78,7 +78,7 @@ def parse_sentences(paragraph):
     return sentences
 
 def read_questions(filename):
-    textfile = open(filename, 'r')
+    textfile = open(filename, 'r',  encoding="utf8")
     lines_txt = [line.rstrip("\n") for line in textfile]
     textfile.close()
     return lines_txt
