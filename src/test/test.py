@@ -6,11 +6,11 @@ from ask_func.generate_question import *
 from ask_func.rank import *
 from answer_func.answer_question import *
 
-def test_what():
-    paragraphs = open_html('../../data/Development_data/set1/a1.htm')
-    sentences = tokenize_sentence(paragraphs)
+def remove_clause_test():
+    # paragraphs = open_txt('a7.txt')
+    # sentences = tokenize_sentence(paragraphs)
     sentences = [
-        'Internal disorders set in during the incredibly long reign of Pepi II (2278–2184 BC) towards the end of the dynasty.'
+        'He accepted the role on advice from Ian Hart, the man who was cast as Quirrell, who told him that Professor Lupin was "the best part in the book.".'
     ]
     for i in range(0, len(sentences)):
         print('*'*60)
@@ -28,28 +28,78 @@ def test_what():
         sList = []
         qList = []
         aList = []
+        for sen in senList:
+            dep_list, pcfg = stanford_parser(sen)
+            word_Pos, Pos_word, NER, dep_dict = Spacy_parser(sen)
+            pcfg.pretty_print()
+            remove = None
+            for s in pcfg.subtrees():
+                if s.label() == 'SBAR':
+                    remove = s.leaves()
+                    break
+            print(remove)
+            if remove != None:
+                remove_s = ' '.join(x for x in remove)
+                remove_s = remove_s.replace('`` ', '"')
+                remove_s = remove_s.replace(" ''", '"')
+                remove_s = remove_s.replace(" ,", ',')
+                remove_s = remove_s.replace(" .", '.')
+                remove_s = ', ' + remove_s + ','
+                index = sen.find(remove_s)
+                if index == -1:
+                    remove_s = remove_s[:len(remove_s)-1]
+                    index = sen.find(remove_s)
+                    if index == -1:
+                        remove_s = remove_s[2:]
+                print(remove_s)
+                new_s = sen.replace(remove_s, '')
+                print(new_s)
+            else:
+                print(sen)
+
+def test_what():
+    # paragraphs = open_txt('../../data/Development_data/set1/a2.txt')
+    # sentences = tokenize_sentence(paragraphs)
+    sentences = [
+        "This trend appears to have been reversed during the early years of the Middle Kingdom, with relatively high water levels recorded for much of this era, with an average inundation of 19 meters above its non-flood levels."
+    ]
+    for i in range(0, 1):
+        print('*'*60)
+        print('Sentence #' + str(i))
+        print('Sentence #' + str(i), file=sys.stderr)
+        sentence = sentences[i]
+        print(sentence)
+        senList1 = extract_bracket(sentence)
+        senList2 = []
+        for s in senList1:
+            senList2 += break_simple_andbut(s, 'but')
+        senList = []
+        for s in senList2:
+            senList += break_simple_andbut(s, 'and')
+        sList = []
+        qList = []
+        aList = []
         for s in senList:
             dep_list, pcfg = stanford_parser(s)
+            s = remove_clause(s, pcfg)
+            dep_list, pcfg = stanford_parser(s)
             word_Pos, Pos_word, NER, dep_dict = Spacy_parser(s)
+
             sList.append(s)
             temp_qList = []
             temp_aList = []
 
             question = what_question(s, dep_list, pcfg, word_Pos, dep_dict)
             if question != '':
+                question = format_question(question)
                 temp_qList.append(question)
-                answer = answer_what(s, question, dep_list, pcfg, word_Pos, dep_dict)
-                temp_aList.append(answer)
             
             qList.append(temp_qList)
-            aList.append(temp_aList)
 
         for i in range(len(sList)):
-            # score(sList[i], qList[i], None, None)
             print('S:', sList[i])
             for j in range(len(qList[i])):
                 print('Q:', qList[i][j])
-                print('A:', aList[i][j])
 
 def test_match():
     paragraphs = open_html('../../data/Development_data/set1/a1.htm')
@@ -153,9 +203,9 @@ def test_answer():
 
 def main():
     # paragraphs = open_html('../../data/Development_data/set1/a1.htm')
-    paragraphs = open_txt('../../data/Development_data/set1/a1.txt')
-    sentences = tokenize_sentence(paragraphs)
-    outputfile = open('questions_a1.txt', 'w')
+    paragraphs = open_txt('../../data/Development_data/set1/a2.txt')
+    sentences = tokenize_sentence(paragraphs)[:50]
+    # outputfile = open('questions_a2.txt', 'w')
     # sentences = [
     #     "Recent reexamination of evidence has led Egyptologist Vassil Dobrev to propose that the Sphinx had been built by Djedefra as a monument to his father Khufu."
     # ]
@@ -179,6 +229,7 @@ def main():
         for s in senList:
             dep_list, pcfg = stanford_parser(s)
             word_Pos, Pos_word, NER, dep_dict = Spacy_parser(s)
+            s = remove_clause(s, pcfg)
 
             sList.append(s)
             temp_qList = []
@@ -216,14 +267,15 @@ def main():
             print('S:', sList[i])
             for j in range(len(qList[i])):
                 print('Q:', qList[i][j])
-                print(qList[i][j], file=outputfile)
+                # print(qList[i][j], file=outputfile)
                 # print('A:', aList[i][j])
-    outputfile.close()
+    # outputfile.close()
     
 
 
 if __name__ == "__main__":
     # main()
-    test_answer()
-    # test_what()
+    # test_answer()
+    test_what()
     # test_match()
+    # remove_clause()

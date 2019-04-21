@@ -133,8 +133,12 @@ def answer_what(sentence, question):
         keyphrase_s = keyphrase_s.replace(' ,', ',')
         return keyphrase_s
     elif copula != '':
-        obj_index = sentence.index(copula)
-        answer = sentence[obj_index+len(copula)+1:]
+        obj_index = sentence.find(' '+copula+' ')
+        if obj_index == -1:
+            obj_index = sentence.find(' '+copula+',')
+            if obj_index == -1:
+                return ''
+        answer = sentence[obj_index+len(copula)+2:]
         return answer
     else:
         # find the original word in word_Pos dict
