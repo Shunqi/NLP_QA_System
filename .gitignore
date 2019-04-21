@@ -3,3 +3,6 @@ stanford-parser-full-2018-10-17/
 data/
 __pycache__/
 test_questions.txt
+*.ipynb
+ask_when.py
+stanford-ner-*/
