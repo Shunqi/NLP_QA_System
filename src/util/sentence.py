@@ -63,6 +63,13 @@ def get_nsubj(sentence):
             return chunk.text
     return ''
 
+def get_NE(sentence):
+    l = []
+    doc = nlp(sentence)
+    for ent in doc.ents:
+        l.append(ent.label_)
+    return l
+    
 def get_ROOT(sentence):
     doc = nlp(sentence)
     for token in doc:
