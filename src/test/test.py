@@ -1,10 +1,12 @@
 import sys
+import traceback
 sys.path.append('../')
 from util.sentence import *
 from util.parse_json import *
 from ask_func.generate_question import *
 from ask_func.rank import *
 from answer_func.answer_question import *
+from ask_func.rank_questions import *
 
 def remove_clause_test():
     # paragraphs = open_txt('a7.txt')
@@ -58,10 +60,10 @@ def remove_clause_test():
                 print(sen)
 
 def test_what():
-    # paragraphs = open_txt('../../data/Development_data/set1/a2.txt')
-    # sentences = tokenize_sentence(paragraphs)
+    paragraphs = open_txt('../../data/Development_data/set1/a4.txt')
+    sentences = tokenize_sentence(paragraphs)
     sentences = [
-        "This trend appears to have been reversed during the early years of the Middle Kingdom, with relatively high water levels recorded for much of this era, with an average inundation of 19 meters above its non-flood levels."
+        "Often, Middle, and Late Egyptian were all written using both the hieroglyphic and hieratic scripts."
     ]
     for i in range(0, 1):
         print('*'*60)
@@ -271,11 +273,97 @@ def main():
                 # print('A:', aList[i][j])
     # outputfile.close()
     
+def test_ask():
+    n = 3
+    paragraphs = open_txt('../../data/Development_data/set1/a1.txt')
+    sentences = tokenize_sentence(paragraphs)
+    # sentences = [
+    #     "Among the typological features of Egyptian that are typically Afroasiatic are its fusional morphology, nonconcatenative morphology, a series of emphatic consonants, a three-vowel system /a i u/, nominal feminine suffix *-at, nominal m-, adjectival *-ī and characteristic personal verbal affixes."
+    # ]
+    y_n_list = []
+    what_list = []
+    who_list = []
+    when_list = []
+    where_list = []
+    how_list = []
+    for i in range(0, 1):
+        print('Sentence #' + str(i), file=sys.stderr)
+        sentence = sentences[i]
+
+        senList1 = extract_bracket(sentence)
+        senList2 = []
+        for s in senList1:
+            senList2 += break_simple_andbut(s, 'but')
+        senList = []
+        for s in senList2:
+            senList += break_simple_andbut(s, 'and')
+        sList = []
+        qList = []
+        aList = []
+        
+        word_Pos, Pos_word, NER, dep_dict = Spacy_parser(sentence)
+        try:
+            question, tag = create_YN(sentence, word_Pos, Pos_word, dep_dict)
+            question = format_question(question)
+            y_n_list.append((question, tag))
+        except:
+            traceback.print_exc()
+
+
+        for s in senList:
+            dep_list, pcfg = stanford_parser(s)
+            s = remove_clause(s, pcfg)
+            dep_list, pcfg = stanford_parser(s)
+            word_Pos, Pos_word, NER, dep_dict = Spacy_parser(s)
+
+            try:
+                question = what_question(s, dep_list, pcfg, word_Pos, dep_dict)
+                if question != '':
+                    question = format_question(question)
+                    what_list.append(question)
+            except:
+                traceback.print_exc()
+
+            try:
+                question = create_how(s)
+                if question != '':
+                    question = format_question(question)
+                    how_list.append(question)
+            except:
+                traceback.print_exc()
+
+            try:
+                questions = create_when(s)
+                if questions != []:
+                    for qt in questions:
+                        question = qt[0]
+                        tag = qt[1]
+                        qtype = qt[2]
+                        question = format_question(question)
+                        if qtype == 'Who':
+                            who_list.append((question, tag))
+                        elif qtype == 'When':
+                            when_list.append((question, tag))
+                        else:
+                            where_list.append((question, tag))
+            except:
+                traceback.print_exc()
+
+    print(y_n_list)
+    print(what_list)
+    print(who_list)
+    print(when_list)
+    print(where_list)
+    print(how_list)
+    qList = question_rank(n, y_n_list, what_list, who_list, when_list, where_list, how_list)
+    for i in range(len(qList)):
+        print(qList[i])
 
 
 if __name__ == "__main__":
     # main()
     # test_answer()
-    test_what()
+    # test_what()
     # test_match()
     # remove_clause()
+    test_ask()

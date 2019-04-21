@@ -156,7 +156,7 @@ def find_first_comma(doc, word_Pos, sentence, verb, copula):
             location_or_time = sentence[:first_comma+1]
     if location_or_time == '':
         temp_commalist = sentence.split(',')
-        if temp_commalist[0] == first_word.lower():
+        if temp_commalist[0] == first_word.lower() and 'RB' in first_word_tag:
             first_comma = sentence.find(',')
             location_or_time = sentence[:first_comma+1]
     return location_or_time

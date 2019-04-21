@@ -1,6 +1,6 @@
 import random
 # n is the number of questions from command line
-def question_rank(n, y_n_list, what_list, who_list, when_list, where_list, how_many_list, how_much_list):
+def question_rank(n, y_n_list, what_list, who_list, when_list, where_list, how_list):
     count = 0
     result_question = []
 
@@ -55,17 +55,12 @@ def question_rank(n, y_n_list, what_list, who_list, when_list, where_list, how_m
         if count == tough_max:
             break
 
+        if result1 == False and result2 == False and result3 == False and result4 == False:
+            break
     # start to include easy questions
     while count <= n:
-        result_question, result5 = include_q(result_question, how_many_list)
+        result_question, result5 = include_q(result_question, how_list)
         if result5 == True:
-            print("easy q is " + str(count))
-            count += 1
-        if count == n:
-            break
-
-        result_question, result6 = include_q(result_question, how_much_list)
-        if result6 == True:
             print("easy q is " + str(count))
             count += 1
         if count == n:
@@ -128,3 +123,4 @@ def include_q(result_question, hard_list):
             result_question.append(temp)
             return result_question, True
         return result_question, False
+    return result_question, False

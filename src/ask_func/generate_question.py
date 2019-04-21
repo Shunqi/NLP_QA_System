@@ -62,7 +62,7 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
         if root_word == "cannot":
             root_word = "can"
         result = root_word.capitalize() + " " + sentence + "?"
-        return result
+        return result, tag
 
     for x in tokens:
         x = str(x)
@@ -71,7 +71,7 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
                 sentence = sentence.replace("cannot" + " ", "")
             sentence = sentence.replace(x + " ", "")
             result = x.capitalize() + " " + sentence + "?"
-            return result
+            return result, tag
 
     # there is no be_words, check what is the tense of the sentence
     # find the original word in word_Pos dict
@@ -592,7 +592,7 @@ def create_when(sentence):
 #                 question += location_or_time
 
             question += "?"
-            questions.append((question, ent["level"]))
+            questions.append((question, ent["level"], question_type))
 
     return questions
 
