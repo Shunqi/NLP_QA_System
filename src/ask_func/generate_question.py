@@ -429,23 +429,28 @@ def countable_noun(noun):
         return True
     return False
 
+
 def select_question(sentence):
     obj = ''
-    for chunk in get_namechunks(sentence).keys():
-        if 'CARDINAL' in get_entity(chunk) or 'QUANTITY' in get_entity(chunk):
-            obj = get_namechunks(sentence)[chunk]
+    ner = get_NE(sentence)
+    if 'MONEY' in ner or 'CARDINAL' in ner or 'PERCENT' in ner or 'QUANTITY' in ner:
+        for chunk in get_namechunks(sentence).keys():
+            if 'CARDINAL' in get_entity(chunk) or 'QUANTITY' in get_entity(chunk):
+                obj = get_namechunks(sentence)[chunk]
 
-    if obj == '':
-        return gen_question_type3(sentence, obj)
-    
-    if countable_noun(obj):
-        if 'there' in sentence.lower():
-            return gen_question_type2(sentence, obj)
+        if obj == '':
+            return gen_question_type3(sentence, obj)
+        
+        if countable_noun(obj):
+            if 'there' in sentence.lower():
+                return gen_question_type2(sentence, obj)
+            else:
+                return gen_question_type1(sentence, obj)
         else:
-            return gen_question_type1(sentence, obj)
+            return gen_question_type3(sentence, obj)
     else:
-        return gen_question_type3(sentence, obj)
-
+        return ''
+        
 def checkValidSentence(sentence):
     dependency, pas = stanford_parser(sentence)
     isSentence = False
