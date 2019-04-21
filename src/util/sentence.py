@@ -174,9 +174,33 @@ def replace_first_comma(question, location_or_time, neg_rb):
         return question, location_or_time
 
 def replace_verb(question, verb, verb_s):
-    index = question.find(' ' + verb + ' ')
-    if index == -1:
-        index = question.find(' ' + verb)
-    if index == -1:
-        index = question.find(verb + ' ')
+    start = question.find(' ' + verb + ' ')
+    if start == -1:
+        start = question.find(' ' + verb)
+    if start != -1:
+        start = start + 1
+    else:
+        start = question.find(verb + ' ')
+    if start == -1:
+        return question
+    end = start + len(verb)
+    question = question[:start] + verb_s + question[end:]
+    return question
+
+def format_question(question):
+    words = question.split()
+    if words[-1] == '?':
+        words = words[:-1]
+        words[-1] = words[-1] + '?'
+    question = " ".join(words)
+    return question.capitalize()
+
+def filter_what(question, sentence):
+    question = format_question(question)
+    question_list = question.split()
+    sentence_list = sentence.split()
+    if len(question_list) < 5 or len(question_list) > len(sentence_list) - 3:
+        return ''
+    else:
+        return question
     
