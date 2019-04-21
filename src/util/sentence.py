@@ -63,6 +63,13 @@ def get_nsubj(sentence):
             return chunk.text
     return ''
 
+def get_NE(sentence):
+    l = []
+    doc = nlp(sentence)
+    for ent in doc.ents:
+        l.append(ent.label_)
+    return l
+    
 def get_ROOT(sentence):
     doc = nlp(sentence)
     for token in doc:
@@ -117,3 +124,59 @@ def lower_firstword(sentence, word_Pos):
         first_word_lower = first_word.lower()
         sentence = sentence.replace(first_word, first_word_lower, 1)
     return sentence
+
+def get_nearest_prep(keyphrase, word_Pos, verb):
+    filtered_list = ['the', 'that']
+    prep = ''
+    start = 0
+    if keyphrase.count(verb) >= 1:
+        start = keyphrase.index(verb) + 1
+    for i in range(start, len(keyphrase)):
+        if i > 1 + start:
+            break
+        temp_prep = keyphrase[i]
+        if temp_prep not in filtered_list and word_Pos.get(temp_prep) != None \
+            and ('IN' in word_Pos.get(temp_prep) or 'TO' in word_Pos.get(temp_prep)):
+            prep = temp_prep
+            if i == start and temp_prep == 'to' and word_Pos.get(keyphrase[i+1]) != None and 'VB' in word_Pos.get(keyphrase[i+1]):
+                prep = prep + ' ' + keyphrase[i+1]
+            if i == 1 + start:
+                prep = keyphrase[i-1] + ' ' + prep
+            break
+    return prep
+
+def find_first_comma(doc, word_Pos, sentence, verb, copula):
+    location_or_time = ''
+    first_word = str(doc[0])
+    first_word_tag = word_Pos.get(first_word)[2]  # the tag of the first word
+    # print(first_word, first_word_tag)
+    if first_word != 'The' and ('IN' in first_word_tag or first_word_tag == 'TO' or first_word_tag == 'VBG'):
+        first_comma = sentence.find(',')
+        if (verb != '' and first_comma < sentence.find(verb)) or (copula != '' and first_comma < sentence.find(copula)):
+            location_or_time = sentence[:first_comma+1]
+    if location_or_time == '':
+        temp_commalist = sentence.split(',')
+        if temp_commalist[0] == first_word.lower():
+            first_comma = sentence.find(',')
+            location_or_time = sentence[:first_comma+1]
+    return location_or_time
+
+def replace_first_comma(question, location_or_time, neg_rb):
+    if location_or_time != '' and location_or_time in question:
+        question = question.replace(location_or_time, '')[1:]
+        location_or_time = ' ' + location_or_time[:-1]
+        if location_or_time[1:] in neg_rb:
+            location_or_time = ''
+        return question, location_or_time
+    else:
+        if location_or_time in neg_rb:
+            location_or_time = ''
+        return question, location_or_time
+
+def replace_verb(question, verb, verb_s):
+    index = question.find(' ' + verb + ' ')
+    if index == -1:
+        index = question.find(' ' + verb)
+    if index == -1:
+        index = question.find(verb + ' ')
+    
