@@ -352,60 +352,144 @@ def gen_question_type3(sentence,obj):
     return "How much "+obj+get_tense(root[2])+subj+" "+root[1].lower()+' '+prep.lower()+' '+loc+'?'
 
 def create_when(sentence):
+    be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have', 'had', 'has']
     doc = nlp(sentence)
 
-    nsubj = ""
-    for chunk in doc.noun_chunks:
-        if chunk.root.dep_ == "nsubj":
-            nsubj = chunk.text
+    dep_list, pcfg = stanford_parser(sentence)
+    word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
+    root_word, tag = dep_dict.get("ROOT")
+
+    dependency = dep_list
+
+    keyword = ''
+    copula = ''
+    verb = ''
+    aux = ''
+    auxpass = ''
+    keyword_tag = ''
+    for i in range(len(dependency)):
+        # print(dependency[i])
+        if (dependency[i][1] == 'cop'):
+    #         keyword = dependency[i][0][0]
+            copula = dependency[i][2][0]
+            keyword_tag = dependency[i][0][1]
+            break
+    if keyword == '':
+        for i in range(len(dependency)):
+            # print(dependency[i])
+            if (dependency[i][1] == 'nsubj'):
+                keyword = dependency[i][2][0]
+                verb = dependency[i][0][0]
+                keyword_tag = dependency[i][2][1]
+                break
+
+    if copula == '' and verb != root_word and root_word != keyword and 'VB' in tag:
+        keyword = ''
+    if keyword == '':
+        verb = root_word
+
+    for i in range(len(dependency)):
+        if dependency[i][1] == 'aux':
+            aux = dependency[i][2][0]
+            break
+    if verb != '':
+        for i in range(len(dependency)):
+            if (dependency[i][1] == 'auxpass' and verb == dependency[i][0][0]):
+                auxpass = dependency[i][2][0]
+                break
 
     questions = []
+    ent_type_map = dict()
+    ent_type_map["PERSON"] = "Who"
+    ent_type_map["ORG"] = "Who"
+    ent_type_map["DATE"] = "When"
+    ent_type_map["TIME"] = "When"
+    ent_type_map["LOCATION"] = "Where"
+    ent_type_map["GPE"] = "Where"
 
-    verb = ""
-    for i in range(len(doc)):
-        token = doc[i]
-        if token.pos_ == "VERB":
-            verb = token
-            break
+    subject = keyword
+
+    ents = []
 
     for ent in doc.ents:
-        # print(ent.text, ent.start_char, ent.end_char, ent.label_)
+        if len(ents) == 0:
+            e = dict()
+            e['text'] = ent.text
+            e['start'] = ent.start_char
+            e['end'] = ent.end_char
+            e['label'] = ent.label_
+            ents.append(e)
+        else:
+            prev = ents[-1]
+            if ent.start_char - prev['end'] < 3 and prev['label'] == ent.label_:
+                prev['text'] += " " + ent.text
+                prev['end'] = ent.end_char
+            elif ent.start_char - prev['end'] < 8 and prev['label'] == ent.label_ and "and" in sentence[prev['end']:ent.start_char]:
+                prev['text'] += " " + ent.text
+                prev['end'] = ent.end_char
+            else:
+                e = dict()
+                e['text'] = ent.text
+                e['start'] = ent.start_char
+                e['end'] = ent.end_char
+                e['label'] = ent.label_
+                ents.append(e)
+
+    for ent in ents:
         question_type = ""
-        start_char = 0
-        end_char = 0
-
-        if ent.label_ == "PERSON":
-            question_type = "Who"
-            start_char = ent.start_char
-            end_char = ent.end_char
-
-        elif ent.label_ in ["DATE", "TIME"]:
-            question_type = "When"
-            start_char = doc.text[0:ent.start_char - 1].rfind(" ") + 1
-            end_char = ent.end_char
-
-        elif ent.label_ in ["LOCATION", "GPE"]:
-            question_type = "Where"
-            start_char = doc.text[0:ent.start_char - 1].rfind(" ") + 1
-            end_char = ent.end_char
-
+        if ent['label'] in ent_type_map:
+            question_type = ent_type_map[ent['label']]
+        start_char = ent['start']
+        end_char = ent['end']
 
         if question_type != "":
-            # print(ent.text, nsubj)
-            if type(verb) == str:
+            if subject == "" or root_word == "":
                 continue
-            elif verb.dep_ != "aux" and ent.text != nsubj:
-                if verb.tag_ == "VBD":
-                    question_verb = "did"
-                else:
-                    question_verb = "does"
-                q = question_type + " " + question_verb + " " + doc.text[0:start_char].replace(verb.text, verb.lemma_) + doc.text[end_char:].replace(verb.text, verb.lemma_)[1:]
+            
+            question = question_type
+            verb_first = True
+            # asking what is the subject
+            if subject in ent['text']:
+                verb_first = False
+                
+                # subject + be_words -> ask for the object
+                # subject + non-be -> ask for the subject
+                is_be = root_word in be_words
+                if is_be:
+                    question += " " + root_word + " " + ent['text']
+                else:            
+                    question += sentence[0:start_char]
+                    question += sentence[end_char:-1]
             else:
-                question_verb = verb.text
-                q = question_type + " " + question_verb + " " + doc.text[0:start_char] + doc.text[end_char:].replace(question_verb, "")[2:]
-            q = q[:-1] + '?'
-            questions.append(q)
-    return questions
+                if ent['label'] == "ORG":
+                    continue
+                    
+                if verb_first:
+                    is_be = root_word in be_words
+                    if is_be:
+                        q_verb = root_word
+                    else:
+                        if aux != "":
+                            q_verb = " " + aux + " "
+                        elif auxpass != "":
+                            q_verb = " " + auxpass + " "
+                        else:
+                            q_verb = get_tense(root_word)
+                    
+                    question += q_verb 
+                    # first part
+                    if " " + q_verb in sentence[0:start_char]:
+                        question += sentence[0:start_char].replace(" " + q_verb, "")
+                        question += sentence[end_char:-1]
+                    else:
+                        question += sentence[0:start_char]
+                        question += sentence[end_char:-1].replace(" " + q_verb, "")
+                
+            question += "?"
+            questions.append(question)
+
+        return questions
+        
 
 def create_how(sentence):
     return select_question(sentence)
