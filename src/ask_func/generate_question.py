@@ -425,22 +425,34 @@ def create_when(sentence):
             e['start'] = ent.start_char
             e['end'] = ent.end_char
             e['label'] = ent.label_
+            e['level'] = 0
             ents.append(e)
         else:
             prev = ents[-1]
             if ent.start_char - prev['end'] < 3 and prev['label'] == ent.label_:
                 prev['text'] += " " + ent.text
                 prev['end'] = ent.end_char
+                prev['level'] = 1
             elif ent.start_char - prev['end'] < 8 and prev['label'] == ent.label_ and "and" in sentence[prev['end']:ent.start_char]:
                 prev['text'] += " " + ent.text
                 prev['end'] = ent.end_char
+                prev['level'] = 1
             else:
                 e = dict()
                 e['text'] = ent.text
                 e['start'] = ent.start_char
                 e['end'] = ent.end_char
                 e['label'] = ent.label_
+                e['level'] = 0
                 ents.append(e)
+
+    neg_rb = ['however', 'but', 'yet', 'often']
+    location_or_time = find_first_comma(doc, word_Pos, sentence, verb, copula)
+    if location_or_time != "" and location_or_time not in neg_rb:
+        first_comma = sentence.find(',')
+    else:
+        first_comma = -1
+    
 
     for ent in ents:
         question_type = ""
@@ -448,6 +460,9 @@ def create_when(sentence):
             question_type = ent_type_map[ent['label']]
         start_char = ent['start']
         end_char = ent['end']
+
+        if end_char <= first_comma:
+            continue
 
         if question_type != "":
             if subject == "" or root_word == "":
@@ -465,38 +480,49 @@ def create_when(sentence):
                 if is_be:
                     question += " " + root_word + " " + ent['text']
                 else:            
-                    question += sentence[0:start_char]
+                    question += " " + sentence[0:start_char]
                     question += sentence[end_char:-1]
             else:
+                print(ent['text'], subject)
                 if ent['label'] == "ORG":
                     continue
                     
                 if verb_first:
                     is_be = root_word in be_words
                     if is_be:
-                        q_verb = root_word
+                        q_verb = " " + root_word
                     else:
-                        if aux != "":
-                            q_verb = " " + aux + " "
-                        elif auxpass != "":
-                            q_verb = " " + auxpass + " "
+                        if aux != "" or auxpass != "":
+                            if aux == "":
+                                q_verb = " " + auxpass + " "
+                            elif auxpass == "":
+                                q_verb = " " + aux + " "
+                            else:
+                                aux_index = sentence.find(" " + aux)
+                                auxpass_index = sentence.find(" " + auxpass)
+                                if aux_index < auxpass_index:
+                                    q_verb = " " + aux + " "
+                                else:
+                                    q_verb = " " + auxpass + " "
                         else:
                             q_verb = get_tense(root_word)
                     
                     question += q_verb 
                     # first part
-                    if " " + q_verb in sentence[0:start_char]:
-                        question += sentence[0:start_char].replace(" " + q_verb, "")
+                    if q_verb in sentence[0:start_char]:
+                        question += sentence[0:start_char].replace(q_verb, " ")
                         question += sentence[end_char:-1]
                     else:
                         question += sentence[0:start_char]
-                        question += sentence[end_char:-1].replace(" " + q_verb, "")
-                
+                        question += sentence[end_char:-1].replace(q_verb, " ")
+            if first_comma != -1:
+                question, location_or_time = replace_first_comma(question, location_or_time, neg_rb)
+                question += location_or_time
+
             question += "?"
-            questions.append(question)
+            questions.append((question, ent["level"]))
 
         return questions
-        
 
 def create_how(sentence):
     return select_question(sentence)
