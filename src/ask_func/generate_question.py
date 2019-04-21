@@ -317,7 +317,10 @@ def gen_question_type1(sentence,obj):
                     loc = pp
                     
     if subj != None:
-        return "How many "+obj+get_tense(root[2])+subj+" "+root[1].lower()+' '+prep.lower()+' '+loc+'?'
+        if root[1].lower() != 'be':
+            return "How many "+obj+get_tense(root[2])+subj+" "+root[1].lower()+' '+prep.lower()+' '+loc+'?'
+        else:
+            return ''
     else:
         return "How many "+obj+" were "+root[0].lower()+' '+prep.lower()+' '+loc+'?'
 
@@ -337,6 +340,10 @@ def gen_question_type3(sentence,obj):
     if obj == '' and root == '' :
         return ''
     if obj == '' and subj == '' :
+        return ''
+    prep = ''
+    loc = ''
+    if root[1] == 'be':
         return ''
     prep = ''
     loc = ''
@@ -524,14 +531,11 @@ def select_question(sentence):
 
         if obj == '':
             return gen_question_type3(sentence, obj)
-        
-        if countable_noun(obj):
-            if 'there' in sentence.lower():
-                return gen_question_type2(sentence, obj)
-            else:
-                return gen_question_type1(sentence, obj)
+
+        if 'there' in sentence.lower():
+            return gen_question_type2(sentence, obj)
         else:
-            return gen_question_type3(sentence, obj)
+            return gen_question_type1(sentence, obj)
     else:
         return ''
         
