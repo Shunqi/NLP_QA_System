@@ -3,6 +3,8 @@ import random
 
 
 def create_YN(sentence, word_Pos, Pos_word, dep_dict):
+    tag = 0 # 0 is easy and 1 is hard
+
     result = ""  # the string to return
     tense = ""  # the tense of the sentence
     be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have',
@@ -41,6 +43,7 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
 
         if antonyms:  # change to antonyms
             sentence = sentence.replace(word, antonyms[0])
+			tag = 1 
         elif synonyms:  # change to synonyms
             sentence = sentence.replace(word, synonyms[0])
 
@@ -91,4 +94,4 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
         # tense = "past"
         result = "Did " + sentence + "?"
 
-    return result
+    return result, tag 
