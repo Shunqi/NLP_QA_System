@@ -6,6 +6,7 @@ import random
 from answer_func.answer_question import *
 
 def create_YN(sentence, word_Pos, Pos_word, dep_dict):
+    tag = 0 # 0 is easy and 1 is hard
     result = ""  # the string to return
     tense = ""  # the tense of the sentence
     be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have',
@@ -44,6 +45,7 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
 
         if antonyms:  # change to antonyms
             sentence = sentence.replace(word, antonyms[0])
+            tag = 1
         elif synonyms:  # change to synonyms
             sentence = sentence.replace(word, synonyms[0])
 
@@ -94,12 +96,12 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
         # tense = "past"
         result = "Did " + sentence + "?"
 
-    return result
+    return result, tag
 
 def what_question(sentence, dependency, pas, word_Pos, dep_dict):
     be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have',
                 'had', 'has']
-    neg_rb = ['however', 'but', 'yet']
+    neg_rb = ['however', 'but', 'yet', 'often']
     doc = nlp(sentence)
     # for ent in doc.ents:
     #     print(ent.text, ent.start_char, ent.end_char, ent.label_)
@@ -195,17 +197,21 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
 
     location_or_time = find_first_comma(doc, word_Pos, sentence, verb, copula)
     # print(location_or_time)
-    
+
     if verb != '' and keyword != '':
         # find the original word in word_Pos dict
         verb_s = ''
         tag = ''
         if '-' in verb:
             verb_temp = verb.split('-')
+            if word_Pos.get(verb_temp[1]) == None:
+                return ''
             verb_s = word_Pos.get(verb_temp[1])[0]
             verb_s = verb_temp[0] + '-' + verb_s
             tag = word_Pos.get(verb_temp[1])[2]
         else:
+            if word_Pos.get(verb) == None:
+                return ''
             verb_s = word_Pos.get(verb)[0]
             tag = word_Pos.get(verb)[2]
 
@@ -223,8 +229,8 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
         question = sentence[:obj_index-1]
         # print(keyphrase)
         prep = get_nearest_prep(keyphrase, word_Pos, verb)
-        if aux != '':
-            temp_wordlist = sentence.split()
+        temp_wordlist = sentence.split()
+        if aux != '' and ((auxpass != '' and temp_wordlist.index(aux) < temp_wordlist.index(auxpass)) or auxpass == ''):
             if auxpass == 'been' and temp_wordlist.index(aux) + 1 == temp_wordlist.index(auxpass):
                 verb = auxpass + ' ' + verb
             obj_index = sentence.find(aux)
@@ -239,10 +245,12 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
         else:
             # replace the verb with original word
             question, location_or_time = replace_first_comma(question, location_or_time, neg_rb)
-            question = question.replace(verb, verb_s, 1)
+            question = replace_verb(question, verb, verb_s)
+            # question = question.replace(verb, verb_s, 1)
             do_tense = get_tense(tag)
             question = question_type + do_tense + question + ' ' + prep + location_or_time + '?'
-        return question
+
+        return filter_what(question, sentence)
     elif copula != '':
         obj_index = sentence.find(' '+copula+' ')
         if obj_index == -1:
@@ -256,7 +264,8 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
         question, location_or_time = replace_first_comma(question, location_or_time, neg_rb)
 
         question = question_type + ' ' + copula + ' ' + question + location_or_time + '?'
-        return question
+
+        return filter_what(question, sentence)
     else:
         # find the original word in word_Pos dict
         verb_s = word_Pos.get(root_word)[0]
@@ -270,32 +279,41 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
             keyphrase_s = ' '.join(x for x in keyphrase[:length])
             obj_index = sentence.find(keyphrase_s)
         question = sentence[:obj_index-1]
-
+        # print(question)
         question, location_or_time = replace_first_comma(question, location_or_time, neg_rb)
         # replace the verb with original word
-        question = question.replace(root_word, verb_s, 1)
+        question = replace_verb(question, root_word, verb_s)
+        # question = question.replace(root_word, verb_s, 1)
         prep = ''
         if verb != '':
             prep = get_nearest_prep(keyphrase, word_Pos, verb)
-
-        if aux != '':
+        # print(aux, auxpass)
+        temp_wordlist = sentence.split()
+        if aux != '' and ((auxpass != '' and temp_wordlist.index(aux) < temp_wordlist.index(auxpass)) or auxpass == ''):
             if verb == '':
                 question = question_type + ' ' + aux + ' ' + question + ' do' + location_or_time + '?'
+                return ''
             else:
-                temp_wordlist = sentence.split()
-                if auxpass == 'been' and temp_wordlist.index(aux) + 1 == temp_wordlist.index(auxpass):
-                    verb = auxpass + ' ' + verb
-                question = question_type + ' ' + aux + ' ' + question + ' ' + verb + ' ' + prep + location_or_time + '?'
+                if temp_wordlist.index(aux) < temp_wordlist.index(verb):
+                    if auxpass == 'been' and temp_wordlist.index(aux) + 1 == temp_wordlist.index(auxpass):
+                        verb = auxpass + ' ' + verb
+                    elif temp_wordlist[temp_wordlist.index(verb)-1] != aux:
+                        verb = temp_wordlist[temp_wordlist.index(verb)-1] + ' ' + verb
+                    question = question_type + ' ' + aux + ' ' + question + ' ' + verb + ' ' + prep + location_or_time + '?'
+                else:
+                    do_tense = get_tense(tag)
+                    question = question_type + do_tense + question + ' ' + verb_s + ' ' + prep + location_or_time + '?'
         elif auxpass != '':
             question = question_type + ' ' + auxpass + ' ' + question + ' ' + verb + ' ' + prep + location_or_time + '?'
         else:
             do_tense = get_tense(tag)
             if verb == '' or verb in be_words:
                 question = question_type + do_tense + question + ' do' + location_or_time + '?'
+                return ''
             else:
                 question = question_type + do_tense + question + ' ' + verb_s + ' ' + prep + location_or_time + '?'
-            
-        return question
+        
+        return filter_what(question, sentence)
 
 #How Many questions:
     #Question Type1 : Subj + verb + number + noun
@@ -670,14 +688,6 @@ def remove_clause(sentence, pcfg):
         return new_s
     else:
         return sentence
-
-def format_question(question):
-    words = question.split()
-    if words[-1] == '?':
-        words = words[:-1]
-        words[-1] = words[-1] + '?'
-    question = " ".join(words)
-    return question
 
 def main():
     sentences = [
