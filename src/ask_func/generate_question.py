@@ -229,9 +229,6 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
         question = sentence[:obj_index-1]
         # print(keyphrase)
         prep = get_nearest_prep(keyphrase, word_Pos, verb)
-        if prep == 'in':
-            prep = ''
-            question_type = 'Where'
         temp_wordlist = sentence.split()
         if aux != '' and ((auxpass != '' and temp_wordlist.index(aux) < temp_wordlist.index(auxpass)) or auxpass == ''):
             if auxpass == 'been' and temp_wordlist.index(aux) + 1 == temp_wordlist.index(auxpass):
@@ -290,9 +287,6 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
         prep = ''
         if verb != '':
             prep = get_nearest_prep(keyphrase, word_Pos, verb)
-            if prep == 'in':
-                prep = ''
-                question_type = 'Where'
         # print(aux, auxpass)
         temp_wordlist = sentence.split()
         if aux != '' and ((auxpass != '' and temp_wordlist.index(aux) < temp_wordlist.index(auxpass)) or auxpass == ''):
