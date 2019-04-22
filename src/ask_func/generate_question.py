@@ -56,10 +56,22 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
     # find the root word
     temp = dep_dict.get("ROOT")
     root_word = temp[0]  # the root word
-    verb = temp[1]  # the pos tag of the root word
+
+    temp_s = sentence.split(" ")
+      
     if root_word in be_words:
-        sentence = sentence.replace(root_word + " ", "")
-        if root_word == "cannot":
+        sentence = "" # reintialize sentence to empty
+        
+        for i, x in enumerate(temp_s):
+            x = str(x)
+            if x == root_word:
+                sentence += ""
+            else:
+                sentence += x+" " 
+          
+        result = sentence
+        #sentence = sentence.replace(root_word + " ", "")
+        if root_word =="cannot":        
             root_word = "can"
         result = root_word.capitalize() + " " + sentence + "?"
         return result, tag
