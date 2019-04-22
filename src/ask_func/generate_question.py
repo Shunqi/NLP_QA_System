@@ -389,63 +389,6 @@ def create_when(sentence):
     ent_type_map["LOCATION"] = "Where"
     ent_type_map["GPE"] = "Where"
     
-    new_sentence = ""
-    
-    while new_sentence != sentence:
-        if new_sentence != "":
-            sentence = new_sentence
-        
-        print(sentence)
-        doc = nlp(sentence)
-
-        dep_list, pcfg = stanford_parser(sentence)
-        word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
-        root_word, tag = dep_dict.get("ROOT")
-
-        dependency = dep_list
-
-        keyword = ''
-        copula = ''
-        verb = ''
-        aux = ''
-        auxpass = ''
-        keyword_tag = ''
-        for i in range(len(dependency)):
-            # print(dependency[i])
-            if (dependency[i][1] == 'cop'):
-        #         keyword = dependency[i][0][0]
-                copula = dependency[i][2][0]
-                keyword_tag = dependency[i][0][1]
-                break
-        if keyword == '':
-            for i in range(len(dependency)):
-                # print(dependency[i])
-                if (dependency[i][1] == 'nsubj'):
-                    keyword = dependency[i][2][0]
-                    verb = dependency[i][0][0]
-                    keyword_tag = dependency[i][2][1]
-                    break
-
-        if copula == '' and verb != root_word and root_word != keyword and 'VB' in tag:
-            keyword = ''
-        if keyword == '':
-            verb = root_word
-
-        for i in range(len(dependency)):
-            if dependency[i][1] == 'aux':
-                aux = dependency[i][2][0]
-                break
-        if verb != '':
-            for i in range(len(dependency)):
-                if (dependency[i][1] == 'auxpass' and verb == dependency[i][0][0]):
-                    auxpass = dependency[i][2][0]
-                    break
-
-        location_or_time = find_first_comma(doc, word_Pos, sentence, verb, copula)
-        new_sentence, location_or_time = replace_first_comma(sentence, location_or_time, neg_rb)
-    
-    sentence = new_sentence
-    
     doc = nlp(sentence)
 
     dep_list, pcfg = stanford_parser(sentence)
@@ -493,6 +436,59 @@ def create_when(sentence):
 
 
     subject = keyword
+    
+    subject_index = sentence.find(subject)
+    comma_index = sentence.find(",")
+    while comma_index != -1 and comma_index < subject_index and sentence[comma_index + 1:].find(",") < subject_index:
+        comma_index += sentence[comma_index + 1:].find(",") + 1
+
+    if comma_index < subject_index and comma_index != -1:
+        sentence = sentence[comma_index + 2:]
+        
+    doc = nlp(sentence)
+
+    dep_list, pcfg = stanford_parser(sentence)
+    word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
+    root_word, tag = dep_dict.get("ROOT")
+
+    dependency = dep_list
+
+    keyword = ''
+    copula = ''
+    verb = ''
+    aux = ''
+    auxpass = ''
+    keyword_tag = ''
+    for i in range(len(dependency)):
+        # print(dependency[i])
+        if (dependency[i][1] == 'cop'):
+    #         keyword = dependency[i][0][0]
+            copula = dependency[i][2][0]
+            keyword_tag = dependency[i][0][1]
+            break
+    if keyword == '':
+        for i in range(len(dependency)):
+            # print(dependency[i])
+            if (dependency[i][1] == 'nsubj'):
+                keyword = dependency[i][2][0]
+                verb = dependency[i][0][0]
+                keyword_tag = dependency[i][2][1]
+                break
+
+    if copula == '' and verb != root_word and root_word != keyword and 'VB' in tag:
+        keyword = ''
+    if keyword == '':
+        verb = root_word
+
+    for i in range(len(dependency)):
+        if dependency[i][1] == 'aux':
+            aux = dependency[i][2][0]
+            break
+    if verb != '':
+        for i in range(len(dependency)):
+            if (dependency[i][1] == 'auxpass' and verb == dependency[i][0][0]):
+                auxpass = dependency[i][2][0]
+                break
 
     ents = []
 
@@ -534,8 +530,8 @@ def create_when(sentence):
         end_char = ent['end']
 
         # ignore ent that in deleted part(first comma)
-#         if start_char <= first_comma:
-#             continue
+        # if start_char <= first_comma:
+        #     continue
 
         if question_type != "":
             if subject == "" or root_word == "":
@@ -587,14 +583,12 @@ def create_when(sentence):
                     else:
                         question += sentence[0:start_char]
                         question += sentence[end_char:-1].replace(q_verb, " ")
-#             if first_comma != -1:
-#                 question, location_or_time = replace_first_comma(question, location_or_time, neg_rb)
-#                 question += location_or_time
 
             question += "?"
             questions.append((question, ent["level"], question_type))
 
     return questions
+
 
 def create_how(sentence):
     return select_question(sentence)
