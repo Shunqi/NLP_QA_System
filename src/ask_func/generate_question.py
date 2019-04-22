@@ -427,8 +427,8 @@ def create_when(sentence):
                 break
 
     if conj_verb != "":
-        index = s.find('and ' + conj_verb)
-        sentence = s[:index]
+        index = sentence.find('and ' + conj_verb)
+        sentence = sentence[:index]
         
     doc = nlp(sentence)
     
@@ -446,6 +446,8 @@ def create_when(sentence):
     word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
     root_word, tag = dep_dict.get("ROOT")
         
+    # print("*" * 10)
+    # print(sentence)
 
     dependency = dep_list
 
@@ -486,12 +488,13 @@ def create_when(sentence):
                 auxpass = dependency[i][2][0]
                 break
 
-
+    # check first comma
     subject = keyword
     
     subject_index = sentence.find(subject + " ")
     comma_index = sentence.find(",")
     prev_comma_index = comma_index
+    # print(subject, subject_index, comma_index)
     while comma_index != -1 and comma_index < subject_index:
         prev_comma_index = comma_index
         if sentence[comma_index + 1:].find(",") == -1:
@@ -500,14 +503,40 @@ def create_when(sentence):
 
     if prev_comma_index < subject_index:
         sentence = sentence[prev_comma_index + 1:]
+        
+    # print("*" * 10)
+    # print(sentence)
     
-    sentence = sentence.strip()
+    sentence = sentence.strip()    
     doc = nlp(sentence)
 
     dep_list, pcfg = stanford_parser(sentence)
     word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
     root_word, tag = dep_dict.get("ROOT")
+    
+    # remove appositive
+    extra_vp = []
+    for tree in pcfg.subtrees():
+        if tree.label() == "VP" and root_word not in tree.leaves():
+            remove = ""
+            for word in tree.leaves():
+                if word[0] != "\'s":
+                    remove += " "
+                remove += word
+            extra_vp.append(", " + remove.strip() + ", ")
+            
+    for vp in extra_vp:
+        sentence = sentence.replace(vp, "")
 
+    # print("*" * 10)
+    # print(sentence)
+    # last parse?
+    doc = nlp(sentence)
+
+    dep_list, pcfg = stanford_parser(sentence)
+    word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
+    root_word, tag = dep_dict.get("ROOT")
+    
     dependency = dep_list
 
     keyword = ''
