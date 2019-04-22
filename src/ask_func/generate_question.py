@@ -493,8 +493,9 @@ def create_when(sentence):
         comma_index += sentence[comma_index + 1:].find(",") + 1
 
     if prev_comma_index < subject_index:
-        sentence = sentence[prev_comma_index + 2:]
-        
+        sentence = sentence[prev_comma_index + 1:]
+    
+    sentence = sentence.strip()
     doc = nlp(sentence)
 
     dep_list, pcfg = stanford_parser(sentence)
