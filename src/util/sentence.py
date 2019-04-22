@@ -189,6 +189,8 @@ def replace_verb(question, verb, verb_s):
 
 def format_question(question):
     words = question.split()
+    if len(words) < 1:
+        return question
     words[0] = words[0].capitalize()
     if words[len(words)-1] == '?':
         words = words[:len(words)-1]
