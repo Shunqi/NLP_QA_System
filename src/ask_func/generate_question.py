@@ -56,7 +56,7 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
     # find the root word
     temp = dep_dict.get("ROOT")
     root_word = temp[0]  # the root word
-
+    verb = temp[1]  # the pos tag of the root word
     temp_s = sentence.split(" ")
       
     if root_word in be_words:
@@ -717,6 +717,9 @@ def select_question(sentence):
             return ''
         if len(obj_nc) == 1 and 'th ' in obj_nc[0].lower().split():
             return ''
+        if len(obj_nc) == 1 and 'half' in obj_nc[0].lower().split():
+            return ''
+            
         for o in obj_l:
             num = abs(sentence.index(o)-idx)
             if num < minimum:
