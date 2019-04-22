@@ -390,6 +390,14 @@ def create_when(sentence):
     ent_type_map["GPE"] = "Where"
     
     doc = nlp(sentence)
+    contain_candidate = False
+    for ent in doc.ents:
+        if ent.label in ent_type_map.keys():
+            contain_candidate = True
+            break
+    
+    if not contain_candidate:
+        return []
 
     dep_list, pcfg = stanford_parser(sentence)
     word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
@@ -437,13 +445,18 @@ def create_when(sentence):
 
     subject = keyword
     
-    subject_index = sentence.find(subject)
+    subject_index = sentence.find(subject + " ")
     comma_index = sentence.find(",")
-    while comma_index != -1 and comma_index < subject_index and sentence[comma_index + 1:].find(",") < subject_index:
+    prev_comma_index = comma_index
+    while comma_index != -1 and comma_index < subject_index:
+        prev_comma_index = comma_index
+        if sentence[comma_index + 1:].find(",") == -1:
+            break
         comma_index += sentence[comma_index + 1:].find(",") + 1
 
-    if comma_index < subject_index and comma_index != -1:
-        sentence = sentence[comma_index + 2:]
+    print(prev_comma_index)
+    if prev_comma_index < subject_index:
+        sentence = sentence[prev_comma_index + 2:]
         
     doc = nlp(sentence)
 
