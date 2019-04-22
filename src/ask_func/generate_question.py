@@ -379,6 +379,7 @@ def gen_question_type3(sentence,obj):
 def create_when(sentence):
     be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have', 'had', 'has']
     neg_rb = ['however', 'but', 'yet', 'often']
+    candidate = ["PERSON", "ORG", "DATE", "TIME", "LOCATION", "GPE"]
     
     questions = []
     ent_type_map = dict()
@@ -390,6 +391,8 @@ def create_when(sentence):
     ent_type_map["GPE"] = "Where"
     
     doc = nlp(sentence)
+    
+    # check if contains entity
     contain_candidate = False
     for ent in doc.ents:
         if ent.label_ in ent_type_map.keys():
@@ -402,6 +405,32 @@ def create_when(sentence):
     dep_list, pcfg = stanford_parser(sentence)
     word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
     root_word, tag = dep_dict.get("ROOT")
+    
+    # check conj sentences and remove them
+    conj_verb = ""
+    if "VB" in tag:
+        for dep in dep_list:
+            if dep[1] == "conj" and dep[0][0] == root_word:
+                conj_verb = dep[2][0]
+
+    if conj_verb != "":
+        index = s.find('and ' + conj_verb)
+        sentence = s[:index]
+        doc = nlp(sentence)
+        dep_list, pcfg = stanford_parser(sentence)
+        word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
+        root_word, tag = dep_dict.get("ROOT")
+        
+    # check if contains entity
+    contain_candidate = False
+    for ent in doc.ents:
+        if ent.label_ in ent_type_map.keys():
+            contain_candidate = True
+            break
+    
+    if not contain_candidate:
+        return []
+        
 
     dependency = dep_list
 
@@ -454,7 +483,6 @@ def create_when(sentence):
             break
         comma_index += sentence[comma_index + 1:].find(",") + 1
 
-    print(prev_comma_index)
     if prev_comma_index < subject_index:
         sentence = sentence[prev_comma_index + 2:]
         
@@ -542,10 +570,6 @@ def create_when(sentence):
         start_char = ent['start']
         end_char = ent['end']
 
-        # ignore ent that in deleted part(first comma)
-        # if start_char <= first_comma:
-        #     continue
-
         if question_type != "":
             if subject == "" or root_word == "":
                 continue
@@ -601,7 +625,6 @@ def create_when(sentence):
             questions.append((question, ent["level"], question_type))
 
     return questions
-
 
 def create_how(sentence):
     return select_question(sentence)
