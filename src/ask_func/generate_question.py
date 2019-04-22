@@ -418,15 +418,14 @@ def create_when(sentence):
         for dep in dep_list:
             if dep[1] == "conj" and dep[0][0] == root_word:
                 conj_verb = dep[2][0]
+                break
 
     if conj_verb != "":
         index = s.find('and ' + conj_verb)
         sentence = s[:index]
-        doc = nlp(sentence)
-        dep_list, pcfg = stanford_parser(sentence)
-        word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
-        root_word, tag = dep_dict.get("ROOT")
         
+    doc = nlp(sentence)
+    
     # check if contains entity
     contain_candidate = False
     for ent in doc.ents:
@@ -436,6 +435,10 @@ def create_when(sentence):
     
     if not contain_candidate:
         return []
+
+    dep_list, pcfg = stanford_parser(sentence)
+    word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
+    root_word, tag = dep_dict.get("ROOT")
         
 
     dependency = dep_list
@@ -456,7 +459,7 @@ def create_when(sentence):
     if keyword == '':
         for i in range(len(dependency)):
             # print(dependency[i])
-            if (dependency[i][1] == 'nsubj'):
+            if dependency[i][1] in ['nsubj', "nsubjpass"]:
                 keyword = dependency[i][2][0]
                 verb = dependency[i][0][0]
                 keyword_tag = dependency[i][2][1]
@@ -516,7 +519,7 @@ def create_when(sentence):
     if keyword == '':
         for i in range(len(dependency)):
             # print(dependency[i])
-            if (dependency[i][1] == 'nsubj'):
+            if dependency[i][1] in ['nsubj', "nsubjpass"]:
                 keyword = dependency[i][2][0]
                 verb = dependency[i][0][0]
                 keyword_tag = dependency[i][2][1]
@@ -632,6 +635,7 @@ def create_when(sentence):
 
     return questions
 
+
 def create_how(sentence):
     return select_question(sentence)
 
@@ -659,17 +663,24 @@ def select_question(sentence):
     obj = ''
     ner = get_NE(sentence)
     root = get_ROOT(sentence)
+    if root[2][0]!= 'V':
+        return ''
     if root != '':
         idx = sentence.index(root[0])
     
     if 'MONEY' in ner or 'CARDINAL' in ner or 'PERCENT' in ner or 'QUANTITY' in ner:       
         minimum = 9999
         obj_l =[]
+        obj_nc = []
         for chunk in get_namechunks(sentence).keys():
             if 'CARDINAL' in get_entity(chunk) or 'QUANTITY' in get_entity(chunk):
                 obj_l.append(get_namechunks(sentence)[chunk])
-                #print(get_namechunks(sentence)[chunk])
-        
+                obj_nc.append(chunk)
+                print(chunk)
+        if len(obj_nc) == 1 and 'one' in obj_nc[0].lower().split():
+            return ''
+        if len(obj_nc) == 1 and 'th ' in obj_nc[0].lower().split():
+            return ''
         for o in obj_l:
             num = abs(sentence.index(o)-idx)
             if num < minimum:
