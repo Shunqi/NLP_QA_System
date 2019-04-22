@@ -412,15 +412,14 @@ def create_when(sentence):
         for dep in dep_list:
             if dep[1] == "conj" and dep[0][0] == root_word:
                 conj_verb = dep[2][0]
+                break
 
     if conj_verb != "":
         index = s.find('and ' + conj_verb)
         sentence = s[:index]
-        doc = nlp(sentence)
-        dep_list, pcfg = stanford_parser(sentence)
-        word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
-        root_word, tag = dep_dict.get("ROOT")
         
+    doc = nlp(sentence)
+    
     # check if contains entity
     contain_candidate = False
     for ent in doc.ents:
@@ -430,6 +429,10 @@ def create_when(sentence):
     
     if not contain_candidate:
         return []
+
+    dep_list, pcfg = stanford_parser(sentence)
+    word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
+    root_word, tag = dep_dict.get("ROOT")
         
 
     dependency = dep_list
@@ -450,7 +453,7 @@ def create_when(sentence):
     if keyword == '':
         for i in range(len(dependency)):
             # print(dependency[i])
-            if (dependency[i][1] == 'nsubj'):
+            if dependency[i][1] in ['nsubj', "nsubjpass"]:
                 keyword = dependency[i][2][0]
                 verb = dependency[i][0][0]
                 keyword_tag = dependency[i][2][1]
@@ -510,7 +513,7 @@ def create_when(sentence):
     if keyword == '':
         for i in range(len(dependency)):
             # print(dependency[i])
-            if (dependency[i][1] == 'nsubj'):
+            if dependency[i][1] in ['nsubj', "nsubjpass"]:
                 keyword = dependency[i][2][0]
                 verb = dependency[i][0][0]
                 keyword_tag = dependency[i][2][1]
@@ -625,6 +628,7 @@ def create_when(sentence):
             questions.append((question, ent["level"], question_type))
 
     return questions
+
 
 def create_how(sentence):
     return select_question(sentence)
