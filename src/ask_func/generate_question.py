@@ -392,7 +392,7 @@ def create_when(sentence):
     doc = nlp(sentence)
     contain_candidate = False
     for ent in doc.ents:
-        if ent.label in ent_type_map.keys():
+        if ent.label_ in ent_type_map.keys():
             contain_candidate = True
             break
     
