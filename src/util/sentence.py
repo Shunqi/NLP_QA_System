@@ -189,9 +189,9 @@ def replace_verb(question, verb, verb_s):
 
 def format_question(question):
     words = question.split()
-    if words[-1] == '?':
-        words = words[:-1]
-        words[-1] = words[-1] + '?'
+    if words[len(words)-1] == '?':
+        words = words[:len(words)-1]
+        words[len(words)-1] = words[len(words)-1] + '?'
     question = " ".join(words)
     return question.capitalize()
 
@@ -204,3 +204,33 @@ def filter_what(question, sentence):
     else:
         return question
     
+def select_sentence(sentences, n):
+    if n >= len(sentences):
+        return sentences
+    
+    keywordlist1 = [' and', ' but', ' it', 'it ', 'they', 'them', 'their', ' him', ' his', 'he ', ' he' \
+        'her', 'she ', ' she', 'which', 'what', 'who', 'whom', 'where', 'when', 'while', ',', ';']
+    keywordlist2 = ['They', 'He', 'She', 'It']
+    rank_list = []
+    for i in range(len(sentences)):
+        sentence = sentences[i]
+        score = 0
+        words = sentence.split()
+        if sentence[0].isalpha() == False:
+            score += 50
+        if sentence[-1] != '.':
+            score += 50
+        if sentence.count('(') != sentence.count(')'):
+            score += 60
+        if words[0] in keywordlist2:
+            score += 40
+        if len(words) < 10:
+            score += 50
+        for word in keywordlist1:
+            score += sentence.count(word) * 2
+        score += len(words) * 0.1
+        rank_list.append((sentence, score))
+    rank_list.sort(key=lambda tup: tup[1])
+    filtered_sentences = [x[0] for x in rank_list]
+    filtered_sentences = filtered_sentences[:n+5]
+    return filtered_sentences
