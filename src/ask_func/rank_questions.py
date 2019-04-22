@@ -66,13 +66,6 @@ def question_rank(n, y_n_list, what_list, who_list, when_list, where_list, how_l
         if count == n:
             break
 
-        result_question, result7 = include_q(result_question, what_list)
-        if result7 == True:
-            print("easy q is " + str(count))
-            count += 1
-        if count == n:
-            break
-
         result_question, result8 = include_q(result_question, easy_y_n)
         if result8 == True:
             print("easy q is " + str(count))
@@ -96,6 +89,13 @@ def question_rank(n, y_n_list, what_list, who_list, when_list, where_list, how_l
 
         result_question, result11 = include_q(result_question, easy_who)
         if result11 == True:
+            print("easy q is " + str(count))
+            count += 1
+        if count == n:
+            break
+
+        result_question, result7 = include_q(result_question, what_list)
+        if result7 == True:
             print("easy q is " + str(count))
             count += 1
         if count == n:

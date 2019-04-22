@@ -664,17 +664,24 @@ def select_question(sentence):
     obj = ''
     ner = get_NE(sentence)
     root = get_ROOT(sentence)
+    if root[2][0]!= 'V':
+        return ''
     if root != '':
         idx = sentence.index(root[0])
     
     if 'MONEY' in ner or 'CARDINAL' in ner or 'PERCENT' in ner or 'QUANTITY' in ner:       
         minimum = 9999
         obj_l =[]
+        obj_nc = []
         for chunk in get_namechunks(sentence).keys():
             if 'CARDINAL' in get_entity(chunk) or 'QUANTITY' in get_entity(chunk):
                 obj_l.append(get_namechunks(sentence)[chunk])
-                #print(get_namechunks(sentence)[chunk])
-        
+                obj_nc.append(chunk)
+                print(chunk)
+        if len(obj_nc) == 1 and 'one' in obj_nc[0].lower().split():
+            return ''
+        if len(obj_nc) == 1 and 'th ' in obj_nc[0].lower().split():
+            return ''
         for o in obj_l:
             num = abs(sentence.index(o)-idx)
             if num < minimum:
