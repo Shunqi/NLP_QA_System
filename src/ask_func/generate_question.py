@@ -688,6 +688,9 @@ def select_question(sentence):
             return ''
         if len(obj_nc) == 1 and 'th ' in obj_nc[0].lower().split():
             return ''
+        if len(obj_nc) == 1 and 'half' in obj_nc[0].lower().split():
+            return ''
+            
         for o in obj_l:
             num = abs(sentence.index(o)-idx)
             if num < minimum:
