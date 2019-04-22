@@ -629,11 +629,24 @@ def countable_noun(noun):
 def select_question(sentence):
     obj = ''
     ner = get_NE(sentence)
-    if 'MONEY' in ner or 'CARDINAL' in ner or 'PERCENT' in ner or 'QUANTITY' in ner:
+    root = get_ROOT(sentence)
+    if root != '':
+        idx = sentence.index(root[0])
+    
+    if 'MONEY' in ner or 'CARDINAL' in ner or 'PERCENT' in ner or 'QUANTITY' in ner:       
+        minimum = 9999
+        obj_l =[]
         for chunk in get_namechunks(sentence).keys():
             if 'CARDINAL' in get_entity(chunk) or 'QUANTITY' in get_entity(chunk):
-                obj = get_namechunks(sentence)[chunk]
-
+                obj_l.append(get_namechunks(sentence)[chunk])
+                #print(get_namechunks(sentence)[chunk])
+        
+        for o in obj_l:
+            num = abs(sentence.index(o)-idx)
+            if num < minimum:
+                minimum = num
+                obj = o
+            
         if obj == '':
             return gen_question_type3(sentence, obj)
 
@@ -643,6 +656,7 @@ def select_question(sentence):
             return gen_question_type1(sentence, obj)
     else:
         return ''
+        
         
 def checkValidSentence(sentence):
     dependency, pas = stanford_parser(sentence)
