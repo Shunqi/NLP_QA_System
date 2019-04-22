@@ -274,11 +274,12 @@ def main():
     # outputfile.close()
     
 def test_ask():
-    n = 3
-    paragraphs = open_txt('../../data/Development_data/set1/a1.txt')
+    n = 20
+    paragraphs = open_txt('../../data/Development_data/set3/a2.txt')
     sentences = tokenize_sentence(paragraphs)
+    sentences = select_sentence(sentences, n)
     # sentences = [
-    #     "Among the typological features of Egyptian that are typically Afroasiatic are its fusional morphology, nonconcatenative morphology, a series of emphatic consonants, a three-vowel system /a i u/, nominal feminine suffix *-at, nominal m-, adjectival *-ī and characteristic personal verbal affixes."
+    #     "Hindered initially by a jaw injury, he would eventually score 25 goals in 71 appearances with the Revolution."
     # ]
     y_n_list = []
     what_list = []
@@ -286,17 +287,20 @@ def test_ask():
     when_list = []
     where_list = []
     how_list = []
-    for i in range(0, 1):
+    for i in range(0, len(sentences)):
         print('Sentence #' + str(i), file=sys.stderr)
         sentence = sentences[i]
-
-        senList1 = extract_bracket(sentence)
-        senList2 = []
-        for s in senList1:
-            senList2 += break_simple_andbut(s, 'but')
+        print(sentence)
         senList = []
-        for s in senList2:
-            senList += break_simple_andbut(s, 'and')
+        try:
+            senList1 = extract_bracket(sentence)
+            senList2 = []
+            for s in senList1:
+                senList2 += break_simple_andbut(s, 'but')
+            for s in senList2:
+                senList += break_simple_andbut(s, 'and')
+        except:
+            traceback.print_exc()
         sList = []
         qList = []
         aList = []
@@ -349,12 +353,12 @@ def test_ask():
             except:
                 traceback.print_exc()
 
-    print(y_n_list)
-    print(what_list)
-    print(who_list)
-    print(when_list)
-    print(where_list)
-    print(how_list)
+    # print(y_n_list)
+    # print(what_list)
+    # print(who_list)
+    # print(when_list)
+    # print(where_list)
+    # print(how_list)
     qList = question_rank(n, y_n_list, what_list, who_list, when_list, where_list, how_list)
     for i in range(len(qList)):
         print(qList[i])

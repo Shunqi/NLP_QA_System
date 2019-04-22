@@ -58,7 +58,7 @@ def tokenize_sentence(paragraph):
     temp = sent_tokenize(paragraph)
     sent_tokenize_list = []
     #handle special cases
-    end = ['.', '?', '!']
+    end = ['.', '?', '!', '"']
     i = 0
     while i < len(temp):
         sentence = temp[i]
