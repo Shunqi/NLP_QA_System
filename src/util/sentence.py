@@ -189,11 +189,12 @@ def replace_verb(question, verb, verb_s):
 
 def format_question(question):
     words = question.split()
+    words[0] = words[0].capitalize()
     if words[len(words)-1] == '?':
         words = words[:len(words)-1]
         words[len(words)-1] = words[len(words)-1] + '?'
     question = " ".join(words)
-    return question.capitalize()
+    return question
 
 def filter_what(question, sentence):
     question = format_question(question)
