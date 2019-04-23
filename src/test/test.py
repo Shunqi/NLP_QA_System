@@ -139,68 +139,68 @@ def test_match():
         for i in range(10):
             print(scoreList[i][0], scoreList[i][1])
 
-def question_type(question):
-    question = question.lower()
+# def question_type(question):
+#     question = question.lower()
 
-    # TODO: in which year? whom? 
-    question_types = ["where", "when", "who", "what", "how"]
-    question_index = []
-    q_word = question.split(' ')[0]
-    if q_word not in question_types:
-        return "yn"
-    else:
-        for q_type in question_types:
-            if question.find(q_type) < 0:
-                question_index.append(len(question))
-            else:
-                question_index.append(question.find(q_type))
-        question_type = question_types[question_index.index(min(question_index))]
-        # print(question_type)
-        return question_type
+#     # TODO: in which year? whom? 
+#     question_types = ["where", "when", "who", "what", "how"]
+#     question_index = []
+#     q_word = question.split(' ')[0]
+#     if q_word not in question_types:
+#         return "yn"
+#     else:
+#         for q_type in question_types:
+#             if question.find(q_type) < 0:
+#                 question_index.append(len(question))
+#             else:
+#                 question_index.append(question.find(q_type))
+#         question_type = question_types[question_index.index(min(question_index))]
+#         # print(question_type)
+#         return question_type
 
-def test_answer():
-    questions = read_questions('questions_a1.txt')
-    paragraphs = open_txt('../../data/Development_data/set1/a1.txt')
-    sentences = tokenize_sentence(paragraphs)
-    aList = []
-    sList = []
-    for k in range(10):
-        question = questions[k]
-        scoreList = []
-        for i in range(0, len(sentences)):
-            print('Sentence #' + str(i), file=sys.stderr)
-            sentence = sentences[i]
-            # senList1 = extract_bracket(sentence)
-            # senList2 = []
-            # for s in senList1:
-            #     senList2 += break_simple_andbut(s, 'but')
-            senList = [sentence]
-            # for s in senList2:
-            #     senList += break_simple_andbut(s, 'and')
-            for s in senList:
-                similarity = score(s, question, None, None)
-                scoreList.append((similarity, s))
+# def test_answer():
+#     questions = read_questions('questions_a1.txt')
+#     paragraphs = open_txt('../../data/Development_data/set1/a1.txt')
+#     sentences = tokenize_sentence(paragraphs)
+#     aList = []
+#     sList = []
+#     for k in range(10):
+#         question = questions[k]
+#         scoreList = []
+#         for i in range(0, len(sentences)):
+#             print('Sentence #' + str(i), file=sys.stderr)
+#             sentence = sentences[i]
+#             # senList1 = extract_bracket(sentence)
+#             # senList2 = []
+#             # for s in senList1:
+#             #     senList2 += break_simple_andbut(s, 'but')
+#             senList = [sentence]
+#             # for s in senList2:
+#             #     senList += break_simple_andbut(s, 'and')
+#             for s in senList:
+#                 similarity = score(s, question, None, None)
+#                 scoreList.append((similarity, s))
             
-        scoreList.sort(reverse=True)
-        q_type = question_type(question)
-        s = scoreList[0][1]
-        answer = ''
-        if q_type == "yn":
-            answer = answer_YN(s, question)
-        elif q_type == "what":
-            answer = answer_what(s, question)
-        elif q_type == "how":
-            answer = answer_how(s, question)
-        else:
-            answer = answer_when(s, question)
-        aList.append(answer)
-        sList.append(s)
+#         scoreList.sort(reverse=True)
+#         q_type = question_type(question)
+#         s = scoreList[0][1]
+#         answer = ''
+#         if q_type == "yn":
+#             answer = answer_YN(s, question)
+#         elif q_type == "what":
+#             answer = answer_what(s, question)
+#         elif q_type == "how":
+#             answer = answer_how(s, question)
+#         else:
+#             answer = answer_when(s, question)
+#         aList.append(answer)
+#         sList.append(s)
     
-    for i in range(10):
-        print('*'*60)
-        print('Q:', questions[i])
-        print('A:', aList[i])
-        print('S:', sList[i])
+    # for i in range(10):
+    #     print('*'*60)
+    #     print('Q:', questions[i])
+    #     print('A:', aList[i])
+    #     print('S:', sList[i])
         
 
 def main():
@@ -274,12 +274,12 @@ def main():
     # outputfile.close()
     
 def test_ask():
-    n = 20
-    paragraphs = open_txt('../../data/Development_data/set3/a2.txt')
+    n = 10
+    paragraphs = open_txt('../../data/Development_data/set3/a5.txt')
     sentences = tokenize_sentence(paragraphs)
     sentences = select_sentence(sentences, n)
     # sentences = [
-    #     "Hindered initially by a jaw injury, he would eventually score 25 goals in 71 appearances with the Revolution."
+    #     "This experience is what inspired Ash into becoming a Pokémon trainer."
     # ]
     y_n_list = []
     what_list = []
@@ -304,7 +304,7 @@ def test_ask():
         sList = []
         qList = []
         aList = []
-        
+
         word_Pos, Pos_word, NER, dep_dict = Spacy_parser(sentence)
         try:
             question, tag = create_YN(sentence, word_Pos, Pos_word, dep_dict)
@@ -363,11 +363,65 @@ def test_ask():
     for i in range(len(qList)):
         print(qList[i])
 
+def question_type(question):
+    question = question.lower()
+
+    # TODO: in which year? whom? 
+    question_types = ["where", "when", "who", "what", "how"]
+    question_index = []
+    q_word = question.split(' ')[0]
+    if q_word not in question_types:
+        return "yn"
+    else:
+        for q_type in question_types:
+            if question.find(q_type) < 0:
+                question_index.append(len(question))
+            else:
+                question_index.append(question.find(q_type))
+        question_type = question_types[question_index.index(min(question_index))]
+        # print(question_type)
+        return question_type
+
+def test_answer():
+    questions = read_questions('questions_a1.txt')
+    paragraphs = open_txt('../../data/Development_data/set3/a5.txt')
+    sentences = tokenize_sentence(paragraphs)
+    aList = []
+    for k in range(len(questions)):
+        print('Question' + str(k))
+        question = questions[k]
+        scoreList = []
+        for i in range(0, len(sentences)):
+            sentence = sentences[i]
+            senList = [sentence]
+            for s in senList:
+                # similarity = score(s, question, None, None)
+                similarity = score_spacy(s, question)
+                print(similarity)
+                scoreList.append((similarity, s))
+            
+        scoreList.sort(reverse=True)
+        q_type = question_type(question)
+        s = scoreList[0][1]
+        answer = s
+        # if q_type == "yn":
+        #     answer = answer_YN(s, question)
+        # elif q_type == "what":
+        #     answer = answer_what(s, question)
+        # elif q_type == "how":
+        #     answer = answer_how(s, question)
+        # else:
+        #     answer = answer_when(s, question)
+        aList.append(answer)
+    
+    for i in range(len(questions)):
+        print(questions[i])
+        print(aList[i])
 
 if __name__ == "__main__":
     # main()
-    # test_answer()
     # test_what()
     # test_match()
     # remove_clause()
-    test_ask()
+    # test_ask()
+    test_answer()

@@ -5,6 +5,7 @@ from nltk.corpus import wordnet as wn
 from gensim.scripts.glove2word2vec import glove2word2vec
 from gensim.models import KeyedVectors
 from nltk.corpus import stopwords
+from util.sentence import *
 
 
 # you need to install gensim and download the glove.6b.200d.txt online
@@ -108,3 +109,15 @@ def sentence_similarity(sentence1, sentence2):
     # Average the values
     score /= count
     return score
+
+def score_spacy(s, question):
+    doc_s = nlp(s)
+    doc_q = nlp(question)
+    score = doc_s.similarity(doc_q)
+    return score
+
+def process_an_sentences(senteces):
+    pass
+
+def score_short(s, question):
+    pass
