@@ -143,14 +143,16 @@ def score_short(sentences, question):
         scoreList.append((similarity, sentence))
         
     scoreList.sort(reverse=True)
+    if scoreList[0][0] == 0:
+        return None
     s = scoreList[0][1]
     return s
 
 def match_words(s, question):
-    q_words = ['What', 'When', 'Which', 'Where', 'How', 'Who', 'Whom']
+    q_words = ['what', 'when', 'which', 'where', 'how', 'who', 'whom']
     words = question.split()
     score = 0
     for w in words:
-        if len(w) > 1 and w not in q_words and w in s:
-            score += 1
+        if len(w) > 1 and w.lower() not in q_words and w in s:
+            score += s.count(w)
     return score
