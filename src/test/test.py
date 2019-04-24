@@ -383,8 +383,8 @@ def question_type(question):
         return question_type
 
 def test_answer():
-    questions = read_questions('questions_a1.txt')
-    paragraphs = open_txt('../../data/Development_data/set3/a5.txt')
+    questions = read_questions('/Users/wangjunjie/Downloads/handout-2/test_questions.txt')
+    paragraphs = open_txt('/Users/wangjunjie/Downloads/handout-2/data/set1/a1.txt')
     sentences = tokenize_sentence(paragraphs)
     aList = []
     tList = []
@@ -409,9 +409,14 @@ def test_answer():
             answer = score_short(sentences, question)
         else:
             answer = score_short(sentences, question)
-            
+
+        if answer == None:
+            tList.append("Default answer")
+            aList.append("Default answer")
+            continue
         target = answer
         tList.append(target)
+
         if q_type == "yn":
             answer = answer_YN(answer, question)
         elif q_type == "what":
@@ -420,7 +425,7 @@ def test_answer():
             answer = answer_how(answer, question)
         else:
             answer = answer_when(answer, question)
-        aList.append(answer)
+        aList.append(format_answer(answer))
     
     for i in range(len(questions)):
         print(questions[i])
