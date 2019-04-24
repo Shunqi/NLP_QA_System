@@ -7,7 +7,7 @@ from util.sentence import *
 def answer_YN(s, q):
     # count the number of not, 't, no in original sentence
     doc = nlp(s)
-    words = ['not',"'n",'no']
+    words = ['not','n','no','cannot']
     count = 0 # number of negative words
     JJ_word =[]
     
@@ -21,46 +21,57 @@ def answer_YN(s, q):
     doc_q = nlp(q) # tokenize the question 
     for token in doc_q:        
         if token.tag_ == "JJ": # there is an adjective word 
-            JJ_word_q.append(token.text)
+            JJ_word_q.append(token.text)         
         
-        '''
-        else: # there is no adjective word
-            if count%2 == 0:
-                return "Yes"
-            else:
-                return "No"
-        '''
-    target_word = []
-    for i, word in enumerate(JJ_word_q):
-        if word not in JJ_word: # the word does not exists in original sentence
-            target_word.append([word, JJ_word])
-                
-    if not target_word: # if the list is empty
+    if not JJ_word_q:
         if count%2 == 0:
             return "Yes"
         else:
             return "No"
+            
+    target_word = []
+    
+    for i, word in enumerate(JJ_word_q):
+        if word not in JJ_word: # the word does not exists in original sentence
+            target_word.append([word, JJ_word])
+    print(target_word)
+                
+    if not target_word: # if the list is empty
+        if count%2 == 0:
+            return "Yes"
+        elif count == 1:
+            return 'No'
+        else:
+            return "No"
+        
     else: # the list is not empty
-        word_q = target_word[0][0]
-        word_s = target_word[0][1] # it's a list
         
-        wordnet = word_net(word_q)
-        synonyms = wordnet[0]
-        antonyms =  wordnet[1]
+        for i, words in enumerate(target_word):
+            word_q = words[0]
+            word_s_list = words[1] # it's a list
+            
+            wordnet = word_net(word_q)
+            synonyms = wordnet[0]
+            antonyms =  wordnet[1]
         
-        for word in word_s:
-            if word in synonyms: # if the words are synonyms
-                if count%2 == 0:
-                    return "Yes"
-                else:
-                    return "No"
-            elif word in antonyms: # if the words are antonyms
-                if count%2 == 0:
-                    return "No"
-                else:
-                    return "Yes"
-            else: # word doesn't belong to any of those
-                continue 
+            for word in word_s_list:
+                if word in synonyms: # if the words are synonyms
+                    if i == len(target_word)-1:
+                        if count%2 == 0:
+                            return "Yes"
+                        else:
+                            return "No"                    
+                    else:
+                         continue
+                elif word in antonyms: # if the words are antonyms
+                    if count%2 == 0:
+                        return "No"
+                    elif count ==1:
+                        return "No"
+                    else:
+                        return "Yes"
+                else: # word doesn't belong to any of those
+                    continue 
 
 
 def word_net(word):  # input is a word
@@ -149,7 +160,7 @@ def answer_what(sentence, question):
         if obj_index == -1:
             obj_index = sentence.find(' '+copula+',')
             if obj_index == -1:
-                return sentence
+                return ''
         answer = sentence[obj_index+len(copula)+2:]
         return answer
     else:
