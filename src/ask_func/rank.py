@@ -116,8 +116,30 @@ def score_spacy(s, question):
     score = doc_s.similarity(doc_q)
     return score
 
-def process_an_sentences(senteces):
-    pass
+def process_an_sentences(sentences):
+    newlist = []
+    for s in sentences:
+        s = remove_stopwords(s)
+        newlist.append(s)
+    return newlist
 
-def score_short(s, question):
-    pass
+def score_short(sentences, question):
+    question = remove_stopwords(question)
+    scoreList = []
+    for i in range(0, len(sentences)):
+        sentence = sentences[i]
+        similarity = match_words(sentence, question)
+        print(similarity)
+        scoreList.append((similarity, sentence))
+        
+    scoreList.sort(reverse=True)
+    s = scoreList[0][1]
+    return s
+
+def match_words(s, question):
+    words = question.split()
+    score = 0
+    for w in words:
+        if len(w) > 1 and w in s:
+            score += 1
+    return score

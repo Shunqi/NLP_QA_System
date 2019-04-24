@@ -387,35 +387,44 @@ def test_answer():
     paragraphs = open_txt('../../data/Development_data/set3/a5.txt')
     sentences = tokenize_sentence(paragraphs)
     aList = []
+    tList = []
     for k in range(len(questions)):
         print('Question' + str(k))
         question = questions[k]
-        scoreList = []
-        for i in range(0, len(sentences)):
-            sentence = sentences[i]
-            senList = [sentence]
-            for s in senList:
-                # similarity = score(s, question, None, None)
-                similarity = score_spacy(s, question)
-                print(similarity)
-                scoreList.append((similarity, s))
-            
-        scoreList.sort(reverse=True)
         q_type = question_type(question)
-        s = scoreList[0][1]
-        answer = s
-        # if q_type == "yn":
-        #     answer = answer_YN(s, question)
-        # elif q_type == "what":
-        #     answer = answer_what(s, question)
-        # elif q_type == "how":
-        #     answer = answer_how(s, question)
-        # else:
-        #     answer = answer_when(s, question)
+        answer = ''
+        target = ''
+        if len(question.split()) > 7:
+            # scoreList = []
+            # for i in range(0, len(sentences)):
+            #     sentence = sentences[i]
+            #     similarity = score_spacy(sentence, question)
+            #     print(similarity)
+            #     scoreList.append((similarity, sentence))
+                
+            # scoreList.sort(reverse=True)
+            # q_type = question_type(question)
+            # s = scoreList[0][1]
+            # answer = s
+            answer = score_short(sentences, question)
+        else:
+            answer = score_short(sentences, question)
+            
+        target = answer
+        tList.append(target)
+        if q_type == "yn":
+            answer = answer_YN(answer, question)
+        elif q_type == "what":
+            answer = answer_what(answer, question)
+        elif q_type == "how":
+            answer = answer_how(answer, question)
+        else:
+            answer = answer_when(answer, question)
         aList.append(answer)
     
     for i in range(len(questions)):
         print(questions[i])
+        print(tList[i])
         print(aList[i])
 
 if __name__ == "__main__":
