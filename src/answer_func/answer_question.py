@@ -22,33 +22,44 @@ def answer_YN(s, q):
     for token in doc_q:
         if token.tag_ == "JJ":  # there is an adjective word
             JJ_word_q.append(token.text)
-        else:  # there is no adjective word
-            if count % 2 == 0:
+
+        '''
+        else: # there is no adjective word
+            if count%2 == 0:
                 return "Yes"
             else:
                 return "No"
+        '''
 
+    target_word = []
     for i, word in enumerate(JJ_word_q):
-        if word in s:  # if the original sentence contains this word
+        if word not in JJ_word:  # the word does not exists in original sentence
+            target_word.append([word, JJ_word[i]])
+
+    print(target_word)
+
+    if not target_word:  # if the list is empty
+        if count % 2 == 0:
+            return "Yes"
+        else:
+            return "No"
+    else:  # the list is not empty
+        word_s = target_word[0][0]
+        word_q = target_word[0][1]
+        wordnet = word_net(word_q)
+        synonyms = wordnet[0]
+        antonyms = wordnet[1]
+
+        if word_s in synonyms:  # if the words are synonyms
             if count % 2 == 0:
                 return "Yes"
             else:
                 return "No"
-        else:  # the word is not in the original sentence
-            wordnet = word_net(word)
-            synonyms = wordnet[0]
-            antonyms = wordnet[1]
-
-            if word in synonyms:  # if the words are synonyms
-                if count % 2 == 0:
-                    return "Yes"
-                else:
-                    return "No"
-            if word in antonyms:  # if the words are antonyms
-                if count % 2 == 0:
-                    return "No"
-                else:
-                    return "Yes"
+        if word_s in antonyms:  # if the words are antonyms
+            if count % 2 == 0:
+                return "No"
+            else:
+                return "Yes"
 
 
 def word_net(word):  # input is a word
