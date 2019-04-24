@@ -7,22 +7,22 @@ from util.sentence import *
 def answer_YN(s, q):
     # count the number of not, 't, no in original sentence
     doc = nlp(s)
-    words = ['not', "'n", 'no']
-    count = 0  # number of negative words
-    JJ_word = []
-
-    for token in doc:
+    words = ['not',"'n",'no']
+    count = 0 # number of negative words
+    JJ_word =[]
+    
+    for token in doc:        
         if token.text.lower() in words:
-            count += 1
-        if token.tag_ == "JJ":
-            JJ_word.append(token.text)  # update the ADJ word in list
-
+            count +=1
+        if token.tag_ =="JJ":
+            JJ_word.append(token.text) # update the ADJ word in list
+    
     JJ_word_q = []
-    doc_q = nlp(q)  # tokenize the question
-    for token in doc_q:
-        if token.tag_ == "JJ":  # there is an adjective word
+    doc_q = nlp(q) # tokenize the question 
+    for token in doc_q:        
+        if token.tag_ == "JJ": # there is an adjective word 
             JJ_word_q.append(token.text)
-
+        
         '''
         else: # there is no adjective word
             if count%2 == 0:
@@ -30,34 +30,37 @@ def answer_YN(s, q):
             else:
                 return "No"
         '''
-
     target_word = []
     for i, word in enumerate(JJ_word_q):
-        if word not in JJ_word:  # the word does not exists in original sentence
-            target_word.append([word, JJ_word[i]])
-
-    if not target_word:  # if the list is empty
-        if count % 2 == 0:
+        if word not in JJ_word: # the word does not exists in original sentence
+            target_word.append([word, JJ_word])
+                
+    if not target_word: # if the list is empty
+        if count%2 == 0:
             return "Yes"
         else:
             return "No"
-    else:  # the list is not empty
-        word_s = target_word[0][0]
-        word_q = target_word[0][1]
+    else: # the list is not empty
+        word_q = target_word[0][0]
+        word_s = target_word[0][1] # it's a list
+        
         wordnet = word_net(word_q)
         synonyms = wordnet[0]
-        antonyms = wordnet[1]
-
-        if word_s in synonyms:  # if the words are synonyms
-            if count % 2 == 0:
-                return "Yes"
-            else:
-                return "No"
-        if word_s in antonyms:  # if the words are antonyms
-            if count % 2 == 0:
-                return "No"
-            else:
-                return "Yes"
+        antonyms =  wordnet[1]
+        
+        for word in word_s:
+            if word in synonyms: # if the words are synonyms
+                if count%2 == 0:
+                    return "Yes"
+                else:
+                    return "No"
+            elif word in antonyms: # if the words are antonyms
+                if count%2 == 0:
+                    return "No"
+                else:
+                    return "Yes"
+            else: # word doesn't belong to any of those
+                continue 
 
 
 def word_net(word):  # input is a word
