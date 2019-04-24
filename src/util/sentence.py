@@ -188,6 +188,8 @@ def replace_verb(question, verb, verb_s):
     return question
 
 def format_question(question):
+    if question == None:
+        return ''
     words = question.split()
     if len(words) < 1:
         return question
@@ -197,6 +199,19 @@ def format_question(question):
         words[len(words)-1] = words[len(words)-1] + '?'
     question = " ".join(words)
     return question
+
+def format_answer(answer):
+    if answer == None:
+        return ''
+    words = answer.split()
+    if len(words) < 1:
+        return answer
+    words[0] = words[0].capitalize()
+    if words[len(words)-1] == '.':
+        words = words[:len(words)-1]
+        words[len(words)-1] = words[len(words)-1] + '.'
+    answer = " ".join(words)
+    return answer
 
 def filter_what(question, sentence):
     question = format_question(question)

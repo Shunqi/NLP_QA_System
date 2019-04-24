@@ -1,13 +1,14 @@
 import nltk
 from nltk import word_tokenize, pos_tag
 from nltk.corpus import wordnet as wn
+from nltk.stem import WordNetLemmatizer
 
 from gensim.scripts.glove2word2vec import glove2word2vec
 from gensim.models import KeyedVectors
 from nltk.corpus import stopwords
 from util.sentence import *
 
-
+lemmatizer = WordNetLemmatizer()
 # you need to install gensim and download the glove.6b.200d.txt online
 
 # inputs are two sentence, s1 is the question, s2 is the sentence from the text
@@ -36,6 +37,13 @@ def remove_stopwords(s):
 
     word_tokens = word_tokenize(s)
     filtered_sentence = [w.strip() for w in word_tokens if w not in stopwords]
+    text = " ".join(str(x) for x in filtered_sentence)
+    return text
+
+def lemmatize(s):
+    # lemmatize sentence
+    word_tokens = word_tokenize(s)
+    filtered_sentence = [lemmatizer.lemmatize(w.strip()) for w in word_tokens]
     text = " ".join(str(x) for x in filtered_sentence)
     return text
 
@@ -116,8 +124,35 @@ def score_spacy(s, question):
     score = doc_s.similarity(doc_q)
     return score
 
-def process_an_sentences(senteces):
-    pass
+def process_an_sentences(sentences):
+    newlist = []
+    for s in sentences:
+        s = remove_stopwords(s)
+        newlist.append(s)
+    return newlist
 
-def score_short(s, question):
-    pass
+def score_short(sentences, question):
+    question = remove_stopwords(question)
+    scoreList = []
+    for i in range(0, len(sentences)):
+        sentence = sentences[i]
+        similarity = match_words(sentence, question)
+        sentence_lemma = lemmatize(sentence)
+        similarity += match_words(sentence_lemma, question)
+        print(similarity)
+        scoreList.append((similarity, sentence))
+        
+    scoreList.sort(reverse=True)
+    if scoreList[0][0] == 0:
+        return None
+    s = scoreList[0][1]
+    return s
+
+def match_words(s, question):
+    q_words = ['what', 'when', 'which', 'where', 'how', 'who', 'whom']
+    words = question.split()
+    score = 0
+    for w in words:
+        if len(w) > 1 and w.lower() not in q_words and w in s:
+            score += s.count(w)
+    return score
