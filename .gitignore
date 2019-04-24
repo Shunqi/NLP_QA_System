@@ -6,3 +6,5 @@ test_questions.txt
 *.ipynb
 ask_when.py
 stanford-ner-*/
+.env
+.vscode/

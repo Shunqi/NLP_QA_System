@@ -227,19 +227,19 @@ def answer_when(candidate, question):
 
     if question_type == "where":
         for ent in doc.ents:
-            if ent.label_ in ["LOCATION", "GPE"]:
+            if ent.label_ in ["LOCATION", "GPE"] and ent.text not in question:
                 return ent.text
         return candidate
 
     elif question_type == "when":
         for ent in doc.ents:
-            if ent.label_ in ["DATE", "TIME"]:
+            if ent.label_ in ["DATE", "TIME"] and ent.text not in question:
                 return ent.text
         return candidate
 
     elif question_type == "who":
         for ent in doc.ents:
-            if ent.label_ in ["PERSON"]:
+            if ent.label_ in ["PERSON"] and ent.text not in question:
                 return ent.text
         return candidate
 
