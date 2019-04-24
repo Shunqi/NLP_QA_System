@@ -32,7 +32,7 @@ def remove_clause_test():
         aList = []
         for sen in senList:
             dep_list, pcfg = stanford_parser(sen)
-            word_Pos, Pos_word, NER, dep_dict = Spacy_parser(sen)
+            word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sen)
             pcfg.pretty_print()
             remove = None
             for s in pcfg.subtrees():
@@ -85,7 +85,7 @@ def test_what():
             dep_list, pcfg = stanford_parser(s)
             s = remove_clause(s, pcfg)
             dep_list, pcfg = stanford_parser(s)
-            word_Pos, Pos_word, NER, dep_dict = Spacy_parser(s)
+            word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
 
             sList.append(s)
             temp_qList = []
@@ -131,7 +131,7 @@ def test_match():
             
             for s in senList:
                 dep_list, pcfg = stanford_parser(s)
-                word_Pos, Pos_word, NER, dep_dict = Spacy_parser(s)
+                word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
                 similarity = score(s, question, None, None)
                 scoreList.append((similarity, s))
         scoreList.sort(reverse=True)
@@ -230,7 +230,7 @@ def main():
         aList = []
         for s in senList:
             dep_list, pcfg = stanford_parser(s)
-            word_Pos, Pos_word, NER, dep_dict = Spacy_parser(s)
+            word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
             s = remove_clause(s, pcfg)
 
             sList.append(s)
@@ -305,7 +305,7 @@ def test_ask():
         qList = []
         aList = []
 
-        word_Pos, Pos_word, NER, dep_dict = Spacy_parser(sentence)
+        word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
         try:
             question, tag = create_YN(sentence, word_Pos, Pos_word, dep_dict)
             question = format_question(question)
@@ -318,7 +318,7 @@ def test_ask():
             dep_list, pcfg = stanford_parser(s)
             s = remove_clause(s, pcfg)
             dep_list, pcfg = stanford_parser(s)
-            word_Pos, Pos_word, NER, dep_dict = Spacy_parser(s)
+            word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
 
             try:
                 question = what_question(s, dep_list, pcfg, word_Pos, dep_dict)

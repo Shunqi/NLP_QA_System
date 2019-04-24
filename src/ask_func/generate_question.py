@@ -862,7 +862,7 @@ def main():
         aList = []
         for s in senList:
             dep_list, pcfg = stanford_parser(s)
-            word_Pos, Pos_word, NER, dep_dict = Spacy_parser(s)
+            word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
             sList.append(s)
             temp_qList = []
             temp_aList = []

@@ -88,7 +88,7 @@ def word_net(word):  # input is a word
 
 def answer_what(sentence, question):
     dependency, pas = stanford_parser(sentence)
-    word_Pos, _, _, dep_dict = Spacy_parser(sentence)
+    word_Pos, _, _, dep_dict, doc = Spacy_parser(sentence)
     # there is no be_words, check what is the tense of the sentence
     temp = dep_dict.get("ROOT")
     root_word = temp[0]  # the root word
