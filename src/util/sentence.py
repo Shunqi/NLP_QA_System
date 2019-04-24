@@ -61,37 +61,33 @@ def Spacy_parser(sentence):
         
     return word_Pos, Pos_word, NER, dep_dict, doc 
 
-def get_nsubj(sentence):
-    doc = nlp(sentence)
-    for chunk in doc.noun_chunks:
-        if chunk.root.dep_ == 'nsubj':
-            return chunk.text
-    return ''
-
 def get_NE(sentence):
     l = []
     doc = nlp(sentence)
     for ent in doc.ents:
         l.append(ent.label_)
     return l
-    
-def get_ROOT(sentence):
-    doc = nlp(sentence)
+def get_nsubj(doc):
+    for chunk in doc.noun_chunks:
+        if chunk.root.dep_ == 'nsubj':
+            return chunk.text
+    return ''
+
+def get_ROOT(doc):
     for token in doc:
         if token.dep_ == 'ROOT':
             return token.text, token.lemma_,token.tag_
     return ''
 
-def get_entity(sentences):
+def get_entity(doc):
     entity = []
-    doc = nlp(sentences)
     for ent in doc.ents:
         entity.append( ent.label_)
     return entity
 
-def get_namechunks(sentence):
+
+def get_namechunks(doc):
     chunks = {}
-    doc = nlp(sentence)
     for chunk in doc.noun_chunks:
         chunks[chunk.text] = chunk.root.text
         #chunks.append(chunk.text)
@@ -111,8 +107,7 @@ def get_tense(verb_t):
         result = ' does '
     return result
 
-def get_pps(sentence):
-    doc = nlp(sentence)
+def get_pps(doc):
     pps = []
     for token in doc:
         # Try this with other parts of speech for different subtrees.

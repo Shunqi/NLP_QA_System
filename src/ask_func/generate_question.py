@@ -401,21 +401,11 @@ def create_when(sentence):
     ent_type_map["TIME"] = "When"
     ent_type_map["LOCATION"] = "Where"
     ent_type_map["GPE"] = "Where"
-    
-    doc = nlp(sentence)
-    
-    # check if contains entity
-    contain_candidate = False
-    for ent in doc.ents:
-        if ent.label_ in ent_type_map.keys():
-            contain_candidate = True
-            break
-    
-    if not contain_candidate:
-        return []
 
     dep_list, pcfg = stanford_parser(sentence)
-    word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
+    word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
+    if not NER:
+        return []
     root_word, tag = dep_dict.get("ROOT")
     
     # check conj sentences and remove them
@@ -443,7 +433,7 @@ def create_when(sentence):
         return []
 
     dep_list, pcfg = stanford_parser(sentence)
-    word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
+    word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
     root_word, tag = dep_dict.get("ROOT")
         
     # print("*" * 10)
@@ -511,7 +501,7 @@ def create_when(sentence):
     doc = nlp(sentence)
 
     dep_list, pcfg = stanford_parser(sentence)
-    word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
+    word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
     root_word, tag = dep_dict.get("ROOT")
     
     # remove appositive
@@ -534,7 +524,7 @@ def create_when(sentence):
     doc = nlp(sentence)
 
     dep_list, pcfg = stanford_parser(sentence)
-    word_Pos, Pos_word, _, dep_dict = Spacy_parser(sentence)
+    word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
     root_word, tag = dep_dict.get("ROOT")
     
     dependency = dep_list
