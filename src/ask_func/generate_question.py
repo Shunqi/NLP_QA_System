@@ -737,8 +737,7 @@ def select_question(sentence):
         return ''
         
         
-def checkValidSentence(sentence):
-    dependency, pas = stanford_parser(sentence)
+def checkValidSentence(sentence, dependency, pas):
     isSentence = False
     for s in pas.subtrees():
         if s.label() == 'S':
@@ -776,7 +775,7 @@ def break_simple_andbut(sentence, andORbut):
     s1 = sentence[:position] + '.'
     s2 = sentence[position+len(', ' + andORbut + ' '):]
     dependency, pas = stanford_parser(s2)
-    if checkValidSentence(s2):
+    if checkValidSentence(s2, dependency, pas):
         dependency1, pas1 = stanford_parser(s1)
         # print(dependency1)
         # pas1.pretty_print()
@@ -790,6 +789,7 @@ def break_simple_andbut(sentence, andORbut):
         for s in pas1.subtrees():
             if s.label() == 'NP' and subj in s.leaves() and subjphrase == None:
                 subjphrase = s.leaves()
+                break
         
         if subjphrase is None:
             senList.append(sentence)
