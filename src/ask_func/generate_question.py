@@ -332,18 +332,19 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
     #Question Type2 : There is/are + number + noun + in + place
     #Question type3: noun + with + number + noun phrase
     #被动句
-def gen_question_type1(sentence,obj):
-    root = get_ROOT(sentence)
-    subj =get_nsubj(sentence)
+def gen_question_type1(doc,obj):
+    root = get_ROOT(doc)
+    subj =get_nsubj(doc)
     prep = ''
     loc = ''
-    if len(get_pps(sentence)) > 0:
-        for pp in get_pps(sentence):
-            if pp.upper().split()[0] in ['DURING','IN','WHITIN','FROM','UNTIL'] and len(get_entity(pp))>0:
-                if 'DATE' in get_entity(pp) or 'TIME' in get_entity(pp): #'CARDINAL' in get_entity(pp) or
+    if len(get_pps(doc)) > 0:
+        for pp in get_pps(doc):
+            ner = get_NE(pp)
+            if pp.upper().split()[0] in ['DURING','IN','WHITIN','FROM','UNTIL'] and len(ner)>0:
+                if 'DATE' in ner or 'TIME' in ner: #'CARDINAL' in get_entity(pp) or
                     prep = pp
-            if (pp.upper().split()[0] == 'IN' or pp.upper().split()[0] == 'ON' or pp.upper().split()[0] == 'AT') and len(get_entity(pp))>0:
-                if get_entity(pp)[0] in ['GPE','FAC','ORG','LOC']:
+            if (pp.upper().split()[0] == 'IN' or pp.upper().split()[0] == 'ON' or pp.upper().split()[0] == 'AT') and len(ner)>0:
+                if ner[0] in ['GPE','FAC','ORG','LOC']:
                     loc = pp
                     
     if subj != None:
@@ -353,37 +354,37 @@ def gen_question_type1(sentence,obj):
             return ''
     else:
         return "How many "+obj+" were "+root[0].lower()+' '+prep.lower()+' '+loc+'?'
-
-def gen_question_type2(sentence,obj):
+        
+def gen_question_type2(doc,obj):
     prep = ''
-    if len(get_pps(sentence)) > 0:
-        for pp in get_pps(sentence):
-            if pp.upper().split()[0] == 'IN' and len(get_entity(pp))>0:
-                if get_entity(pp)[0] in ['GPE','FAC','ORG','LOC']:
+    if len(get_pps(doc)) > 0:
+        for pp in get_pps(doc):
+            ner = get_NE(pp)
+            if pp.upper().split()[0] == 'IN' and len(ner)>0:
+                if ner[0] in ['GPE','FAC','ORG','LOC']:
                     prep = pp
 
     return "How many "+obj+" are there "+prep.lower()+'?'
 
-def gen_question_type3(sentence,obj):
-    root = get_ROOT(sentence)
-    subj =get_nsubj(sentence)
+def gen_question_type3(doc,obj):
+    root = get_ROOT(doc)
+    subj =get_nsubj(doc)
     if obj == '' and root == '' :
         return ''
     if obj == '' and subj == '' :
         return ''
-    prep = ''
-    loc = ''
     if root[1] == 'be':
         return ''
     prep = ''
     loc = ''
-    if len(get_pps(sentence)) > 0:
-        for pp in get_pps(sentence):
-            if pp.upper().split()[0] in ['DURING','IN','WHITIN','FROM','UNTIL'] and len(get_entity(pp))>0:
-                if 'CARDINAL' in get_entity(pp) or 'DATE' in get_entity(pp) or 'TIME' in get_entity(pp):
+    if len(get_pps(doc)) > 0:
+        for pp in get_pps(doc):
+            ner = get_NE(pp)
+            if pp.upper().split()[0] in ['DURING','IN','WHITIN','FROM','UNTIL'] and len(ner)>0:
+                if 'CARDINAL' in ner or 'DATE' in ner or 'TIME' in ner:
                     prep = pp
-            if (pp.upper().split()[0] == 'IN' or pp.upper().split()[0] == 'ON') and len(get_entity(pp))>0:
-                if get_entity(pp)[0] in ['GPE','FAC','ORG','LOC']:
+            if (pp.upper().split()[0] == 'IN' or pp.upper().split()[0] == 'ON') and len(ner)>0:
+                if ner[0] in ['GPE','FAC','ORG','LOC']:
                     loc = pp
 
     return "How much "+obj+get_tense(root[2])+subj+" "+root[1].lower()+' '+prep.lower()+' '+loc+'?'
@@ -662,8 +663,8 @@ def create_when(sentence):
     return questions
 
 
-def create_how(sentence):
-    return select_question(sentence)
+def create_how(doc,sentence):
+    return select_question(doc,sentence)
 
 def countable_noun(noun):
     url = 'https://books.google.com/ngrams/graph?content=many+' + noun + '%2C+much+' + noun + '&year_start=1800&year_end=2000'
@@ -685,10 +686,10 @@ def countable_noun(noun):
     return False
 
 
-def select_question(sentence):
+def select_question(doc,sentence):
     obj = ''
-    ner = get_NE(sentence)
-    root = get_ROOT(sentence)
+    ner = get_entity(doc)
+    root = get_ROOT(doc)
     if root[2][0]!= 'V':
         return ''
     if root != '':
@@ -698,18 +699,20 @@ def select_question(sentence):
         minimum = 9999
         obj_l =[]
         obj_nc = []
-        for chunk in get_namechunks(sentence).keys():
-            if 'CARDINAL' in get_entity(chunk) or 'QUANTITY' in get_entity(chunk):
-                obj_l.append(get_namechunks(sentence)[chunk])
+        for chunk in get_namechunks(doc).keys():
+            ner_c = get_NE(chunk)
+            if 'CARDINAL' in ner_c or 'QUANTITY' in ner_c:
+                obj_l.append(get_namechunks(doc)[chunk])
                 obj_nc.append(chunk)
-                print(chunk)
+                #print(chunk)
+        #print(obj_nc)
         if len(obj_nc) == 1 and 'one' in obj_nc[0].lower().split():
             return ''
         if len(obj_nc) == 1 and 'th ' in obj_nc[0].lower().split():
             return ''
         if len(obj_nc) == 1 and 'half' in obj_nc[0].lower().split():
             return ''
-            
+        
         for o in obj_l:
             num = abs(sentence.index(o)-idx)
             if num < minimum:
@@ -717,15 +720,15 @@ def select_question(sentence):
                 obj = o
             
         if obj == '':
-            return gen_question_type3(sentence, obj)
+            return gen_question_type3(doc, obj)
 
         if 'there' in sentence.lower():
-            return gen_question_type2(sentence, obj)
+            return gen_question_type2(doc, obj)
         else:
-            return gen_question_type1(sentence, obj)
+            return gen_question_type1(doc, obj)
     else:
         return ''
-        
+
         
 def checkValidSentence(sentence, dependency, pas):
     isSentence = False

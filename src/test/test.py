@@ -248,7 +248,7 @@ def main():
                 # answer = answer_what(s, question, dep_list, pcfg, word_Pos, dep_dict)
                 # temp_aList.append(answer)
 
-            question = create_how(s)
+            question = create_how(doc,s)
             if question != '':
                 temp_qList.append(question)
                 # answer = answer_how(s, question)
