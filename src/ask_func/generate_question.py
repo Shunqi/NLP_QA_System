@@ -10,7 +10,7 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
     result = ""  # the string to return
     tense = ""  # the tense of the sentence
     be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have',
-                'had', 'has']
+                'had', 'has','do', 'did']
 
     tokens = nlp(sentence)
 

@@ -248,23 +248,46 @@ def answer_when(candidate, question):
     question_type = get_question_type(question)
     doc = nlp(candidate)
 
-    if question_type == "where":
-        for ent in doc.ents:
-            if ent.label_ in ["LOCATION", "GPE"]:
-                return ent.text
-        return candidate
+    ents = []
+    for ent in doc.ents:
+        if len(ents) == 0:
+            e = dict()
+            e['text'] = ent.text
+            e['start'] = ent.start_char
+            e['end'] = ent.end_char
+            e['label'] = ent.label_
+            e['level'] = 0
+            ents.append(e)
+        else:
+            prev = ents[-1]
+            if ent.start_char - prev['end'] < 3 and prev['label'] == ent.label_:
+                prev['text'] += " " + ent.text
+                prev['end'] = ent.end_char
+                prev['level'] = 1
+            elif ent.start_char - prev['end'] < 8 and prev['label'] == ent.label_ and "and" in candidate[prev['end']:ent.start_char]:
+                prev['text'] += " " + ent.text
+                prev['end'] = ent.end_char
+                prev['level'] = 1
+            else:
+                e = dict()
+                e['text'] = ent.text
+                e['start'] = ent.start_char
+                e['end'] = ent.end_char
+                e['label'] = ent.label_
+                e['level'] = 0
+                ents.append(e)
 
-    elif question_type == "when":
-        for ent in doc.ents:
-            if ent.label_ in ["DATE", "TIME"]:
-                return ent.text
-        return candidate
+    type_label_map = dict()
+    type_label_map["where"] = ["LOCATION", "GPE"]
+    type_label_map["when"] = ["DATE", "TIME"]
+    type_label_map["who"] = ["PERSON", "ORG"]
 
-    elif question_type == "who":
-        for ent in doc.ents:
-            if ent.label_ in ["PERSON"]:
-                return ent.text
-        return candidate
-
-    else:
-        return candidate
+    for ent in ents:
+        if ent['label'] in type_label_map[question_type] and ent['text'] not in question:
+            return ent['text']
+    
+    for ent in doc.ents:
+        if ent.label_ in type_label_map[question_type] and ent.text not in question:
+            return ent.text
+    
+    return candidate
