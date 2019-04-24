@@ -137,7 +137,7 @@ def answer_what(sentence, question):
         if obj_index == -1:
             obj_index = sentence.find(' '+copula+',')
             if obj_index == -1:
-                return ''
+                return sentence
         answer = sentence[obj_index+len(copula)+2:]
         return answer
     else:
