@@ -198,6 +198,17 @@ def format_question(question):
     question = " ".join(words)
     return question
 
+def format_answer(answer):
+    words = answer.split()
+    if len(words) < 1:
+        return answer
+    words[0] = words[0].capitalize()
+    if words[len(words)-1] == '.':
+        words = words[:len(words)-1]
+        words[len(words)-1] = words[len(words)-1] + '.'
+    answer = " ".join(words)
+    return answer
+
 def filter_what(question, sentence):
     question = format_question(question)
     question_list = question.split()
