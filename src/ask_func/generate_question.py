@@ -403,6 +403,7 @@ def gen_question_type3(doc,obj,dep_list):
 
 def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have', 'had', 'has']
+    neg_rb = ['however', 'but', 'yet', 'often']
     candidate = ["PERSON", "ORG", "DATE", "TIME", "LOCATION", "GPE"]
     pron = ["i", "you", "he", "she", "it", "they", "another", "each", "everything", "nobody", "either", "someone"]
     
@@ -455,7 +456,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
             s_visited = True
             continue
             
-        if not subj_visited and s_visited and before_subj == []:
+        if not subj_visited and s_visited:
             if subject in tree.leaves():
                 subj_visited = True
             else:
@@ -590,7 +591,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     # print(ents)
     
     new_ents = []
-    prep = [" in ", " at ", " on ", " near ", " beside ", " around "]
+    prep = [" in ", " at ", " on ", " near ", " beside ", " around ", " after "]
     for ent in ents:
         # no space before it
         if ent['start'] < 2 or ent['label'] in ['PERSON', 'ORG']:
@@ -602,8 +603,21 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
             ent["start"] = last_space + 1
             new_ents.append(ent)
 
+    # initialize variables
     ents = new_ents
     subject = keyword
+    
+    first_word = sentence[:sentence.find(" ")]
+    lower_first = True
+    if first_word != "I":
+        lower_first = False
+    for token in doc:
+        if token.text == first_word:
+            if token.tag_ == "NNP":
+                lower_first = False
+            break
+    if lower_first:
+        sentence = sentence[0].lower() + sentence[1:]
 
     for ent in ents:
         question_type = ""
