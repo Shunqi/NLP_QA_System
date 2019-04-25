@@ -171,7 +171,7 @@ def answer_what(sentence, question):
         keyphrase_s = keyphrase_s.replace(' ,', ',')
         return keyphrase_s
 
-def get_entity(sentences):
+def get_ent(sentences):
     entity = []
     doc = nlp(sentences)
     for ent in doc.ents:
@@ -186,14 +186,14 @@ def get_noun(sentence):
 
 def locate_cardinal(sentence):
     cardinal = []
-    for en in get_entity(sentence):
+    for en in get_ent(sentence):
         if en[1] == 'CARDINAL' or en[1] == 'QUANTITY':
             cardinal.append(en[0])
     return cardinal
 
 def locate_cardinal2(sentence):
     cardinal = []
-    for en in get_entity(sentence):
+    for en in get_ent(sentence):
         if en[1] in ['CARDINAL', 'QUANTITY','PERCENT','MONEY']:
             cardinal.append(en[0])
     return cardinal
@@ -203,11 +203,15 @@ def get_lemma(word):
     lemma = token[0].lemma_
     return lemma
 
-def answer_how(question, sentence):
+def answer_how(sentence, question):
     noun = get_noun(question)
     if noun is None:
         card_list = locate_cardinal2(sentence)
-        return card_list[0]
+        if len(card_list) != 0:
+            return card_list[0]
+        else:
+            return sentence
+           
     else:
         noun_lemma = get_lemma(noun)
         if 'how much' in question.lower():
@@ -215,7 +219,7 @@ def answer_how(question, sentence):
         else:
             card_list = locate_cardinal(sentence)
         min_dist = 9999
-        answer = ''
+        answer = sentence
         for card in card_list:
             #print(card)
             dist = calculate_word_distance(noun_lemma, card, sentence)
