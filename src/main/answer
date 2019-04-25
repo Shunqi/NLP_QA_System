@@ -14,7 +14,7 @@ def question_type(question):
     question = question.lower()
 
     # TODO: in which year? whom? 
-    question_types = ["where", "when", "who", "what", "how", "which"]
+    question_types = ["where", "when", "who", "what", "how", "which", "why"]
     question_index = []
     q_word = question.split(' ')[0]
     if q_word not in question_types:
@@ -61,6 +61,7 @@ def main():
             aList.append("No answer")
             continue
 
+        target = answer
         tList.append(answer)
 
         if q_type == "yn":
@@ -83,6 +84,9 @@ def main():
                 answer = answer_when(answer, question)
             except:
                 pass
+        
+        if answer == '' or answer == None:
+            answer = target
         try:
             aList.append(format_answer(answer))
         except:
