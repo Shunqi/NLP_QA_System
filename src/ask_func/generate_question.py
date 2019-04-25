@@ -5,8 +5,63 @@ from util.parse_json import parse_json_sentences
 import random
 from answer_func.answer_question import *
 
-def create_YN(sentence, word_Pos, Pos_word, dep_dict):
-    
+def create_YN(sentence, word_Pos, Pos_word, dep_dict, dep_list, pcfg):
+    # this part is to remove the clause before subject
+    dependency = dep_list
+
+    pron = ["i", "you", "he", "she", "it", "they", "another", "each", "everything", "nobody", "either", "someone"]
+
+    keyword = ''
+
+    for i in range(len(dependency)):
+        # print(dependency[i])
+        if dependency[i][1] in ['nsubj', "nsubjpass"]:
+            keyword = dependency[i][2][0]
+            break
+
+    subject = keyword
+
+    if subject == "" or subject.lower() in pron:
+        return []
+
+    # remove clause before subject
+    before_subj = []
+    s_visited = False
+    subj_visited = False
+
+    remove_index = -1
+
+    for tree in pcfg.subtrees():
+        if tree.label() == 'S':
+            s_visited = True
+            continue
+
+        if not subj_visited and s_visited:
+            if subject in tree.leaves():
+                subj_visited = True
+            else:
+                remove = ""
+                for word in tree.leaves():
+                    if word[0].isalnum():
+                        remove += " "
+                    remove += word
+                remove = remove.strip()
+                new_remove_index = sentence.find(remove) + len(remove)
+                if remove != "," and new_remove_index > remove_index:
+                    before_subj.append(remove.strip())
+                    remove_index = new_remove_index
+
+    for subj in before_subj:
+        sentence = sentence.replace(subj, "")
+
+    # format new sentence
+    for i in range(len(sentence)):
+        if sentence[i].isalnum():
+            break
+    sentence = sentence[i:]
+
+    # end of the function
+
     tag = 0 # 0 is easy and 1 is hard
     
     result = ""  # the string to return
@@ -601,7 +656,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     # print(ents)
     
     new_ents = []
-    prep = [" in ", " at ", " on ", " near ", " beside ", " around ", " after "]
+    prep = [" in ", " at ", " on ", " near ", " beside ", " around ", " after ", " since "]
     for ent in ents:
         # no space before it
         if ent['start'] < 2 or ent['label'] in ['PERSON', 'ORG']:
@@ -617,9 +672,10 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     ents = new_ents
     subject = keyword
     
+    # lower the case of first char
     first_word = sentence[:sentence.find(" ")]
     lower_first = True
-    if first_word != "I":
+    if first_word == "I":
         lower_first = False
     for token in doc:
         if token.text == first_word:
@@ -651,7 +707,8 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                 is_be = root_word in be_words
                 if is_be:
                     continue
-                    # question += " " + root_word + " " + ent['text']
+                    # question += " " + root_word + " "
+                    
                 else:
                     question += " " + sentence[0:start_char]
                     question += sentence[end_char:-1]
