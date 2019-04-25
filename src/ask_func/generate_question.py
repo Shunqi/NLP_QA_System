@@ -653,7 +653,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                         question += sentence[0:start_char]
                         question += sentence[end_char:-1].replace(q_verb, " ")
                         
-                    if aux == "" and auxpass == "":
+                    if not is_be and aux == "" and auxpass == "":
                         question = question.replace(" " + root_word, " " + root_word_lemma)
 
             question += "?"
