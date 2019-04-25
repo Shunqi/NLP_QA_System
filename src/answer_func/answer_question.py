@@ -291,8 +291,16 @@ def answer_when(candidate, question):
             prev = ents[-1]
             if ent.start_char - prev['end'] < 4 and prev['label'] == ent.label_:
                 prev['text'] += candidate[prev['end']:ent.end_char]
+                prev_end = prev['end']
                 prev['end'] = ent.end_char
                 prev['level'] = 1
+                # deal with (
+                if "(" in candidate[prev_end:ent.start_char]:
+                    right_bracket_index = candidate[ent.end_char:].find(")")
+                    if right_bracket_index != -1:
+                        prev['end'] += right_bracket_index + 1
+                        prev['text'] = candidate[prev['start']:prev['end']]
+                    
             elif ent.start_char - prev['end'] < 8 and prev['label'] == ent.label_ and "and" in candidate[prev['end']:ent.start_char]:
                 prev['text'] += candidate[prev['end']:ent.end_char]
                 prev['end'] = ent.end_char
@@ -321,6 +329,7 @@ def answer_when(candidate, question):
 
     return candidate
 
+    
 def answer_short(sentences, question):
     whlist = ['who', 'whom', 'what']
     belist = ['is', 'was', 'are', 'were']
