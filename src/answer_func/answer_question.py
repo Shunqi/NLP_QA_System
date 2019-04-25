@@ -203,6 +203,23 @@ def get_lemma(word):
     lemma = token[0].lemma_
     return lemma
 
+def calculate_word_distance(lemma, card, sentence):
+    sentence_token = nlp(sentence)
+    idx = 0
+    obj_idx = 0
+    card_idx = sentence.find(card)
+    for s in sentence_token:
+        #print(s.text)
+        if s.lemma_ == lemma:
+            obj_idx = idx
+#         if s.text == card:
+#             card_idx = idx
+        idx += 1
+    if card_idx - obj_idx == 0:
+        return 9999
+    else:
+        return abs(card_idx - obj_idx)
+
 def answer_how(question, sentence):
     noun = get_noun(question)
     if noun is None:
