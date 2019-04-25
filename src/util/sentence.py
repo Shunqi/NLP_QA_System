@@ -231,12 +231,9 @@ def filter_what(question, sentence):
         return question
     
 def select_sentence(sentences, n):
-    if n >= len(sentences):
-        return sentences
-    
     keywordlist1 = [' and', ' but', ' it', 'it ', 'they', 'them', 'their', ' him', ' his', 'he ', ' he' \
         'her', 'she ', ' she', 'which', 'what', 'who', 'whom', 'where', 'when', 'while', ',', ';']
-    keywordlist2 = ['They', 'He', 'She', 'It']
+    keywordlist2 = ['They', 'He', 'She', 'It', 'I']
     rank_list = []
     for i in range(len(sentences)):
         sentence = sentences[i]
@@ -249,14 +246,23 @@ def select_sentence(sentences, n):
         if sentence.count('(') != sentence.count(')'):
             score += 60
         if words[0] in keywordlist2:
-            score += 40
+            score += 50
         if len(words) < 10:
             score += 50
         for word in keywordlist1:
-            score += sentence.count(word) * 2
+            score += sentence.count(word) * 3
         score += len(words) * 0.1
         rank_list.append((sentence, score))
     rank_list.sort(key=lambda tup: tup[1])
     filtered_sentences = [x[0] for x in rank_list]
-    filtered_sentences = filtered_sentences[:n+5]
-    return filtered_sentences
+
+    if len(filtered_sentences) * 2 <= n:
+        return filtered_sentences
+    elif len(filtered_sentences) <= n:
+        bound = min(int(n/1.5) , len(filtered_sentences))
+        filtered_sentences = filtered_sentences[:bound]
+        return filtered_sentences
+    else:
+        bound = min(n + 2 , len(filtered_sentences))
+        filtered_sentences = filtered_sentences[:bound]
+        return filtered_sentences
