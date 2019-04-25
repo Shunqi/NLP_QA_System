@@ -1,8 +1,8 @@
 import sys
 sys.path.append('../')
 from util.sentence import *
-from util.parse_json import parse_json_sentences
-import random
+#from util.parse_json import parse_json_sentences
+#import random
 from answer_func.answer_question import *
 
 def create_YN(sentence, word_Pos, Pos_word, dep_dict, dep_list, pcfg):
@@ -784,6 +784,18 @@ def countable_noun(noun):
 
 
 def select_question(doc,sentence,dep_list):
+    if sentence.count(',') == 1:
+        if sentence.find(',') < sentence.find(get_nsubj(dep_list)):
+            sen1 = sentence[:sentence.find(',')]
+            sen2 = sentence[sentence.find(','):]
+            s2 = get_entity(nlp(sen2[1:]))
+            if 'MONEY' in s2 or 'CARDINAL' in s2 or 'PERCENT' in s2 or 'QUANTITY' in s2:
+                select_question(nlp(sen2[1:]),sen2[1:],dep_list)
+            else:
+                s1 = nlp(sen1)
+                if 'CARDINAL' in get_entity(s1) and s1[0].text.lower() in ['after','during','in','since']:
+                    q = s1[0].text + ' how many ' + list(get_namechunks(s1).values())[-1]+sen2
+                    return q
     obj = ''
     ner = get_entity(doc)
     root = get_ROOT(doc)

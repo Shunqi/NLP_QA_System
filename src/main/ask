@@ -35,9 +35,10 @@ def main():
         except:
             senList.append(sentence)
 
+        dep_list, pcfg = stanford_parser(sentence)
         word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
         try:
-            question, tag = create_YN(sentence, word_Pos, Pos_word, dep_dict)
+            question, tag = create_YN(sentence, word_Pos, Pos_word, dep_dict, dep_list, pcfg)
             if question != '':
                 question = format_question(question)
                 y_n_list.append((question, tag))
@@ -45,13 +46,13 @@ def main():
             pass
 
         for sen in senList:
-            print(sen)
-            pcfg = stanford_pcfg(sen)
+            # print(sen)
+            if sen != sentence:
+                pcfg = stanford_pcfg(sen)
             s = remove_clause(sen, pcfg)
-            dep_list = None
             if s != sen:
                 dep_list, pcfg = stanford_parser(s)
-            else:
+            elif s != sentence:
                 dep_list = stanford_dep(s)
 
             if s != sentence:

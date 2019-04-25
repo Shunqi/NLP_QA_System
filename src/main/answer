@@ -44,6 +44,15 @@ def main():
         answer = None
 
         try:
+            answer = answer_short(sentences, question)
+            if answer != None:
+                tList.append(answer)
+                aList.append(answer)
+                continue
+        except:
+            pass
+
+        try:
             answer = score_short(sentences, question)
         except:
             pass
@@ -80,8 +89,8 @@ def main():
             aList.append(answer)
     
     for i in range(len(questions)):
-        print(questions[i])
-        print(tList[i])
+        # print(questions[i])
+        # print(tList[i])
         print(aList[i])
 
 if __name__ == "__main__":
