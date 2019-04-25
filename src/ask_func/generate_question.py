@@ -403,7 +403,6 @@ def gen_question_type3(doc,obj,dep_list):
 
 def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have', 'had', 'has']
-    neg_rb = ['however', 'but', 'yet', 'often']
     candidate = ["PERSON", "ORG", "DATE", "TIME", "LOCATION", "GPE"]
     pron = ["i", "you", "he", "she", "it", "they", "another", "each", "everything", "nobody", "either", "someone"]
     
@@ -476,7 +475,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                 if word[0].isalnum():
                     remove += " "
                 remove += word
-            # if prev in [",", "and", "before", "after"]:
+             # if prev in [",", "and", "before", "after"]:
             if prev != "":
                 remove = prev + remove
             extra_vp.append(remove.strip())
@@ -487,11 +486,14 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     for subj in before_subj:
         sentence = sentence.replace(subj, "")
     
-        
+    # format new sentence    
     for i in range(len(sentence)):
         if sentence[i].isalnum():
             break
-    sentence = sentence[i:]
+    for j in range(len(sentence)):
+        if sentence[len(sentence) - 1 - j].isalnum():
+            break
+    sentence = sentence[i:len(sentence) - 1 - j] + "."
         
     # print(extra_vp)
 
@@ -586,12 +588,21 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                 ents.append(e) 
                 
     # print(ents)
-
-    prep = [" in ", " at ", " on "]
+    
+    new_ents = []
+    prep = [" in ", " at ", " on ", " near ", " beside ", " around "]
     for ent in ents:
-        if sentence[ent["start"] - 4:ent["start"]] in prep:
-            ent["start"] = ent["start"] - 3
+        # no space before it
+        if ent['start'] < 2 or ent['label'] in ['PERSON', 'ORG']:
+            new_ents.append(ent)
+            continue
             
+        last_space = sentence[:ent["start"] - 1].rfind(" ")
+        if sentence[last_space : ent["start"]].lower() in prep:
+            ent["start"] = last_space + 1
+            new_ents.append(ent)
+
+    ents = new_ents
     subject = keyword
 
     for ent in ents:
