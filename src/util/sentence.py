@@ -162,11 +162,14 @@ def find_first_comma(doc, word_Pos, sentence, verb, copula):
         first_comma = sentence.find(',')
         if (verb != '' and first_comma < sentence.find(verb)) or (copula != '' and first_comma < sentence.find(copula)):
             location_or_time = sentence[:first_comma+1]
+    temp_commalist = sentence.split(',')
     if location_or_time == '':
-        temp_commalist = sentence.split(',')
-        if temp_commalist[0] == first_word.lower() and 'RB' in first_word_tag:
+        if len(temp_commalist) > 0 and temp_commalist[0] == first_word.lower() and 'RB' in first_word_tag:
             first_comma = sentence.find(',')
             location_or_time = sentence[:first_comma+1]
+    
+    if location_or_time != '' and len(temp_commalist) > 0 and temp_commalist[1].strip().isdigit():
+        location_or_time += temp_commalist[1] + ','
     return location_or_time
 
 def replace_first_comma(question, location_or_time, neg_rb):
