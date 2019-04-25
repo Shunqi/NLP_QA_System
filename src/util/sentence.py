@@ -38,8 +38,8 @@ def Spacy_parser(sentence):
     doc = nlp(sentence)
     
     for ent in doc.ents:
-		NER = True 
-		break
+        NER = True 
+        break
         
     for token in doc:        
         # update the dict with the word as key
