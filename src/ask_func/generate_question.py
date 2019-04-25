@@ -405,6 +405,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have', 'had', 'has']
     neg_rb = ['however', 'but', 'yet', 'often']
     candidate = ["PERSON", "ORG", "DATE", "TIME", "LOCATION", "GPE"]
+    pron = ["i", "you", "he", "she", "it", "they", "another", "each", "everything", "nobody", "either", "someone"]
     
     questions = []
     ent_type_map = dict()
@@ -425,11 +426,20 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     
     root_word, tag = dep_dict.get("ROOT")
     
-#     subject = dep_dict.get("nsubj")[0]
-    if "nsubj" in dep_dict:
-        subject = dep_dict["nsubj"][0]
-    else:
-        subject = dep_dict["nsubjpass"][0]
+    dependency = dep_list
+
+    keyword = ''
+    
+    for i in range(len(dependency)):
+        # print(dependency[i])
+        if dependency[i][1] in ['nsubj', "nsubjpass"]:
+            keyword = dependency[i][2][0]
+            break
+    
+    subject = keyword
+    
+    if subject == "" or subject.lower() in pron:
+        return []
     
     # print("1.", sentence)
     
@@ -455,7 +465,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                     if word.isalnum():
                         remove += " "
                     remove += word
-                before_subj.append(remove)
+                before_subj.append(remove.strip())
         
         if tree.label() == "VP" and root_word not in tree.leaves():
             remove = ""
@@ -474,6 +484,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
 
     for subj in before_subj:
         sentence = sentence.replace(subj, "")
+    
         
     for i in range(len(sentence)):
         if sentence[i].isalnum():
@@ -629,6 +640,9 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                                     q_verb = " " + auxpass + " "
                         else:
                             q_verb = get_tense(root_word)
+                            root_word_lemma = get_lemma(root_word)
+                            # print(q_verb, root_word, root_word_lemma, sep=":")
+                                                        
                     
                     question += q_verb 
                     # first part
@@ -638,6 +652,9 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                     else:
                         question += sentence[0:start_char]
                         question += sentence[end_char:-1].replace(q_verb, " ")
+                        
+                    if not is_be and aux == "" and auxpass == "":
+                        question = question.replace(" " + root_word, " " + root_word_lemma)
 
             question += "?"
             questions.append((question, ent["level"], question_type))
