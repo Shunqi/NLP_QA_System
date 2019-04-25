@@ -344,9 +344,9 @@ def what_question(sentence, dependency, pas, word_Pos, dep_dict):
     #Question Type2 : There is/are + number + noun + in + place
     #Question type3: noun + with + number + noun phrase
     #被动句
-def gen_question_type1(doc,obj):
+def gen_question_type1(doc,obj,dep_list):
     root = get_ROOT(doc)
-    subj =get_nsubj(doc)
+    subj =get_nsubj(dep_list)
     prep = ''
     loc = ''
     if len(get_pps(doc)) > 0:
@@ -378,9 +378,9 @@ def gen_question_type2(doc,obj):
 
     return "How many "+obj+" are there "+prep.lower()+'?'
 
-def gen_question_type3(doc,obj):
+def gen_question_type3(doc,obj,dep_list):
     root = get_ROOT(doc)
-    subj =get_nsubj(doc)
+    subj =get_nsubj(dep_list)
     if obj == '' and root == '' :
         return ''
     if obj == '' and subj == '' :
@@ -881,8 +881,8 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     return questions
 
 
-def create_how(doc,sentence):
-    return select_question(doc,sentence)
+def create_how(doc,sentence,dep_list):
+    return select_question(doc,sentence,dep_list)
 
 def countable_noun(noun):
     url = 'https://books.google.com/ngrams/graph?content=many+' + noun + '%2C+much+' + noun + '&year_start=1800&year_end=2000'
@@ -904,7 +904,7 @@ def countable_noun(noun):
     return False
 
 
-def select_question(doc,sentence):
+def select_question(doc,sentence,dep_list):
     obj = ''
     ner = get_entity(doc)
     root = get_ROOT(doc)
@@ -938,12 +938,12 @@ def select_question(doc,sentence):
                 obj = o
             
         if obj == '':
-            return gen_question_type3(doc, obj)
+            return gen_question_type3(doc, obj,dep_list)
 
         if 'there' in sentence.lower():
             return gen_question_type2(doc, obj)
         else:
-            return gen_question_type1(doc, obj)
+            return gen_question_type1(doc, obj,dep_list)
     else:
         return ''
 

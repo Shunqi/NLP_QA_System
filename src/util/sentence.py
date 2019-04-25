@@ -69,11 +69,17 @@ def get_NE(sentence):
     for ent in doc.ents:
         l.append(ent.label_)
     return l
-def get_nsubj(doc):
-    for chunk in doc.noun_chunks:
-        if chunk.root.dep_ == 'nsubj':
-            return chunk.text
-    return ''
+    
+def get_nsubj(dep_list):
+    dependency = dep_list
+    keyword = ''
+    if keyword == '':
+        for i in range(len(dependency)):
+            # print(dependency[i])
+            if dependency[i][1] in ['nsubj', "nsubjpass"]:
+                keyword = dependency[i][2][0]
+                break
+    return keyword
 
 def get_ROOT(doc):
     for token in doc:
