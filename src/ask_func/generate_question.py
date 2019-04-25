@@ -401,7 +401,7 @@ def gen_question_type3(doc,obj):
 
     return "How much "+obj+get_tense(root[2])+subj+" "+root[1].lower()+' '+prep.lower()+' '+loc+'?'
 
-def create_when(sentence):
+def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have', 'had', 'has']
     neg_rb = ['however', 'but', 'yet', 'often']
     candidate = ["PERSON", "ORG", "DATE", "TIME", "LOCATION", "GPE"]
@@ -414,8 +414,6 @@ def create_when(sentence):
     ent_type_map["TIME"] = "When"
     ent_type_map["LOCATION"] = "Where"
     ent_type_map["GPE"] = "Where"
-
-    word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
     
     contains_candidate = False
     for ent in doc.ents:
@@ -426,9 +424,12 @@ def create_when(sentence):
         return []
     
     root_word, tag = dep_dict.get("ROOT")
-    dep_list, pcfg = stanford_parser(sentence)
     
-    subject = dep_dict['nsubj'][0]
+#     subject = dep_dict.get("nsubj")[0]
+    if "nsubj" in dep_dict:
+        subject = dep_dict["nsubj"][0]
+    else:
+        subject = dep_dict["nsubjpass"][0]
     
     # print("1.", sentence)
     
@@ -454,7 +455,6 @@ def create_when(sentence):
                     if word.isalnum():
                         remove += " "
                     remove += word
-                    print(remove)
                 before_subj.append(remove)
         
         if tree.label() == "VP" and root_word not in tree.leaves():
@@ -495,7 +495,8 @@ def create_when(sentence):
     if not contains_candidate:
         return []
         
-    dep_list, pcfg = stanford_parser(sentence)
+    # dep_list, pcfg = stanford_parser(sentence)
+    dep_list = stanford_dep(sentence)
     
     dependency = dep_list
 
