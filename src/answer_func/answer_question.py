@@ -2,6 +2,7 @@ from nltk.corpus import wordnet as wn  # import wordnet
 import sys
 sys.path.append('../')
 from util.sentence import *
+from ask_func.rank import *
 
 # a function to answer yes/no question, s is the original sentence, q is the question
 def answer_YN(s, q):
@@ -319,3 +320,34 @@ def answer_when(candidate, question):
             return ent.text
 
     return candidate
+
+def answer_short(sentences, question):
+    whlist = ['who', 'whom', 'what']
+    belist = ['is', 'was', 'are', 'were']
+    if question[len(question)-1] == '?':
+        question = question[:len(question)-1]
+    words = question.split()
+    if len(words) < 5 and words[0].lower() in whlist and words[1].lower() in belist:
+        senf = sentence_frequency(sentences)
+        avgl = get_avglenth(sentences)
+        question = remove_stopwords(question)
+        scoreList = []
+        for i in range(0, len(sentences)):
+            sentence = sentences[i]
+            sentence = remove_stopwords(sentence)
+            # similarity = match_words(sentence, question)
+            sentence_lemma = lemmatize(sentence)
+            question_lemma = lemmatize(question)
+            similarity = match_words(sentence_lemma, question_lemma, senf, avgl)
+            # print(similarity)
+            scoreList.append((similarity, sentences[i]))
+        scoreList.sort(reverse=True)
+        if scoreList[0][0] == 0:
+            return None
+        for stup in scoreList:
+            s = stup[1]
+            swords = s.split()
+            if words[1].lower() in swords and len(swords) > len(words):
+                return s
+    else:
+        return None
