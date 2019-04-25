@@ -520,6 +520,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     
     dependency = dep_list
 
+    dobj = ""    
     keyword = ''
     copula = ''
     verb = ''
@@ -540,6 +541,11 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                 keyword = dependency[i][2][0]
                 verb = dependency[i][0][0]
                 keyword_tag = dependency[i][2][1]
+                break
+
+        for i in range(len(dependency)):
+            if dependency[i][1] == 'dobj':
+                dobj = dependency[i][2][0]
                 break
 
     if copula == '' and verb != root_word and root_word != keyword and 'VB' in tag:
@@ -644,11 +650,15 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                 # subject + non-be -> ask for the subject
                 is_be = root_word in be_words
                 if is_be:
-                    question += " " + root_word + " " + ent['text']
-                else:            
+                    continue
+                    # question += " " + root_word + " " + ent['text']
+                else:
                     question += " " + sentence[0:start_char]
                     question += sentence[end_char:-1]
             else:
+                if question_type == "Who" and (dobj == "" or dobj not in ent['text']):
+                    continue
+                    
                 if ent['label'] == "ORG":
                     continue
                     
