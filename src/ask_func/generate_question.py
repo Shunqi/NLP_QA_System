@@ -428,31 +428,7 @@ def create_when(sentence):
     root_word, tag = dep_dict.get("ROOT")
     dep_list, pcfg = stanford_parser(sentence)
     
-    dependency = dep_list
-    
-    keyword = ''
-    copula = ''
-    verb = ''
-    aux = ''
-    auxpass = ''
-    keyword_tag = ''
-    for i in range(len(dependency)):
-        # print(dependency[i])
-        if (dependency[i][1] == 'cop'):
-    #         keyword = dependency[i][0][0]
-            copula = dependency[i][2][0]
-            keyword_tag = dependency[i][0][1]
-            break
-    if keyword == '':
-        for i in range(len(dependency)):
-            # print(dependency[i])
-            if dependency[i][1] in ['nsubj', "nsubjpass"]:
-                keyword = dependency[i][2][0]
-                verb = dependency[i][0][0]
-                keyword_tag = dependency[i][2][1]
-                break
-                
-    subject = keyword
+    subject = dep_dict['nsubj'][0]
     
     # print("1.", sentence)
     
@@ -465,23 +441,26 @@ def create_when(sentence):
     extra_vp = []
     prev = ""
     for tree in pcfg.subtrees():
-        if subj_visited and s_visited and tree.label() != 'ROOT' and before_subj == []:
-            if tree.label() == 'S':
-                s_visited = True
-            elif subject in tree.leaves():
+        if tree.label() == 'S':
+            s_visited = True
+            continue
+            
+        if not subj_visited and s_visited and before_subj == []:
+            if subject in tree.leaves():
                 subj_visited = True
             else:
                 remove = ""
                 for word in tree.leaves():
-                    if word[0] != "\'":
+                    if word.isalnum():
                         remove += " "
                     remove += word
+                    print(remove)
                 before_subj.append(remove)
         
         if tree.label() == "VP" and root_word not in tree.leaves():
             remove = ""
             for word in tree.leaves():
-                if word[0] != "\'":
+                if word.isalnum():
                     remove += " "
                 remove += word
             if prev in [",", "and", "before", "after"]:
@@ -492,6 +471,14 @@ def create_when(sentence):
             
     for vp in extra_vp:
         sentence = sentence.replace(vp, "")
+
+    for subj in before_subj:
+        sentence = sentence.replace(subj, "")
+        
+    for i in range(len(sentence)):
+        if sentence[i].isalnum():
+            break
+    sentence = sentence[i:]
         
     # print(extra_vp)
 
