@@ -88,7 +88,7 @@ def word_net(word):  # input is a word
 
 def answer_what(sentence, question):
     dependency, pas = stanford_parser(sentence)
-    word_Pos, _, _, dep_dict = Spacy_parser(sentence)
+    word_Pos, _, _, dep_dict, doc = Spacy_parser(sentence)
     # there is no be_words, check what is the tense of the sentence
     temp = dep_dict.get("ROOT")
     root_word = temp[0]  # the root word
@@ -260,12 +260,12 @@ def answer_when(candidate, question):
             ents.append(e)
         else:
             prev = ents[-1]
-            if ent.start_char - prev['end'] < 3 and prev['label'] == ent.label_:
-                prev['text'] += " " + ent.text
+            if ent.start_char - prev['end'] < 4 and prev['label'] == ent.label_:
+                prev['text'] += candidate[prev['end']:ent.end_char]
                 prev['end'] = ent.end_char
                 prev['level'] = 1
             elif ent.start_char - prev['end'] < 8 and prev['label'] == ent.label_ and "and" in candidate[prev['end']:ent.start_char]:
-                prev['text'] += " " + ent.text
+                prev['text'] += candidate[prev['end']:ent.end_char]
                 prev['end'] = ent.end_char
                 prev['level'] = 1
             else:
