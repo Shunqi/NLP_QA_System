@@ -26,26 +26,27 @@ def main():
     for i in range(0, len(sentences)):
         sentence = sentences[i]
         senList = []
-        # try:
-        #     senList1 = extract_bracket(sentence)
-        #     senList2 = []
-        #     for s in senList1:
-        #         senList2 += break_simple_andbut(s, 'but')
-        #     for s in senList2:
-        #         senList += break_simple_andbut(s, 'and')
-        # except:
-        #     pass
-        senList.append(sentence)
+        try:
+            senList1 = extract_bracket(sentence)
+            senList2 = []
+            for s in senList1:
+                senList2 += break_simple_andbut(s, 'but')
+            for s in senList2:
+                senList += break_simple_andbut(s, 'and')
+        except:
+            senList.append(sentence)
 
         word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
         try:
             question, tag = create_YN(sentence, word_Pos, Pos_word, dep_dict)
-            question = format_question(question)
-            y_n_list.append((question, tag))
+            if question != '':
+                question = format_question(question)
+                y_n_list.append((question, tag))
         except:
             pass
 
         for sen in senList:
+            print(sen)
             pcfg = stanford_pcfg(sen)
             s = remove_clause(sen, pcfg)
             dep_list = None

@@ -37,6 +37,7 @@ def main():
     sentences = tokenize_sentence(paragraphs)
 
     aList = []
+    tList = []
     for k in range(len(questions)):
         question = questions[k]
         q_type = question_type(question)
@@ -50,6 +51,8 @@ def main():
         if answer == None:
             aList.append("No answer")
             continue
+
+        tList.append(answer)
 
         if q_type == "yn":
             try:
@@ -77,6 +80,8 @@ def main():
             aList.append(answer)
     
     for i in range(len(questions)):
+        print(questions[i])
+        print(tList[i])
         print(aList[i])
 
 if __name__ == "__main__":

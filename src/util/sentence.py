@@ -245,6 +245,8 @@ def select_sentence(sentences, n):
             score += 50
         if sentence.count('(') != sentence.count(')'):
             score += 60
+        if sentence.count('"') % 2 != 0:
+            score += 60
         if words[0] in keywordlist2:
             score += 50
         if len(words) < 10:
