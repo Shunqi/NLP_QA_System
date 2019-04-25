@@ -543,8 +543,13 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     for vp in extra_vp:
         sentence = sentence.replace(vp, "")
 
-    for subj in before_subj:
+    for subj in before_subj:                
         sentence = sentence.replace(subj, "")
+        # add back time and location
+        if 1 < len(subj.split(" ")[0]) < 5 and subj.split(" ")[0].lower() in ["in", "on", "since", "before", "after"]:
+            subj_doc = nlp(subj)
+            if len(subj_doc.ents) != 0:
+                sentence = sentence[:-1] + " " + subj + sentence[-1]
     
     # format new sentence    
     for i in range(len(sentence)):
@@ -554,11 +559,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
         if sentence[len(sentence) - 1 - j].isalnum():
             break
     sentence = sentence[i:len(sentence) - j] + "."
-        
-    # print(extra_vp)
-
-    # print("*" * 10)
-    # print("2.", sentence)
+    
     # last parse?
     
     doc = nlp(sentence)
