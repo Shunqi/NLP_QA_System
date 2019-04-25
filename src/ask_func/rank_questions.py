@@ -29,28 +29,28 @@ def question_rank(n, y_n_list, what_list, who_list, when_list, where_list, how_l
     while count <= tough_max:
         result_question, result1 = include_q(result_question, hard_y_n)
         if result1 == True:
-            print("tough q is " + str(count))
+            # print("tough q is " + str(count))
             count += 1
         if count == tough_max:
             break
 
         result_question, result2 = include_q(result_question, hard_where)
         if result2 == True:
-            print("tough q is " + str(count))
+            # print("tough q is " + str(count))
             count += 1
         if count == tough_max:
             break
 
         result_question, result3 = include_q(result_question, hard_when)
         if result3 == True:
-            print("tough q is " + str(count))
+            # print("tough q is " + str(count))
             count += 1
         if count == tough_max:
             break
 
         result_question, result4 = include_q(result_question, hard_who)
         if result4 == True:
-            print("tough q is " + str(count))
+            # print("tough q is " + str(count))
             count += 1
         if count == tough_max:
             break
@@ -61,42 +61,42 @@ def question_rank(n, y_n_list, what_list, who_list, when_list, where_list, how_l
     while count <= n:
         result_question, result5 = include_q(result_question, how_list)
         if result5 == True:
-            print("easy q is " + str(count))
+            # print("easy q is " + str(count))
             count += 1
         if count == n:
             break
 
         result_question, result8 = include_q(result_question, easy_y_n)
         if result8 == True:
-            print("easy q is " + str(count))
+            # print("easy q is " + str(count))
             count += 1
         if count == n:
             break
 
         result_question, result9 = include_q(result_question, easy_where)
         if result9 == True:
-            print("easy q is " + str(count))
+            # print("easy q is " + str(count))
             count += 1
         if count == n:
             break
 
         result_question, result10 = include_q(result_question, easy_when)
         if result10 == True:
-            print("easy q is " + str(count))
+            # print("easy q is " + str(count))
             count += 1
         if count == n:
             break
 
         result_question, result11 = include_q(result_question, easy_who)
         if result11 == True:
-            print("easy q is " + str(count))
+            # print("easy q is " + str(count))
             count += 1
         if count == n:
             break
 
         result_question, result7 = include_q(result_question, what_list)
         if result7 == True:
-            print("easy q is " + str(count))
+            # print("easy q is " + str(count))
             count += 1
         if count == n:
             break

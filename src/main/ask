@@ -1,62 +1,104 @@
 #!/usr/bin/env python3 -W ignore::DeprecationWarning
 # -*- coding:utf8 -*-
 import sys
+import traceback
 sys.path.append('../')
 from util.sentence import *
 from util.parse_json import *
 from ask_func.generate_question import *
 from ask_func.rank import *
+from answer_func.answer_question import *
+from ask_func.rank_questions import *
 
 def main():
     article_file = sys.argv[1]
     nquestions = int(sys.argv[2])
-    # paragraphs = open_txt('../../data/Development_data/set1/a1.txt')
     paragraphs = open_txt(article_file)
     sentences = tokenize_sentence(paragraphs)
-    count = 0
-    qList = []
-    # logfile = open('log.txt', 'w')
+    sentences = select_sentence(sentences, nquestions)
+    
+    y_n_list = []
+    what_list = []
+    who_list = []
+    when_list = []
+    where_list = []
+    how_list = []
     for i in range(0, len(sentences)):
         sentence = sentences[i]
-        # print(sentence, file=logfile)
-        senList1 = extract_bracket(sentence)
-        senList2 = []
-        for s in senList1:
-            senList2 += break_simple_andbut(s, 'but')
         senList = []
-        for s in senList2:
-            senList += break_simple_andbut(s, 'and')
-        
-        for s in senList:
-            dep_list, pcfg = stanford_parser(s)
-            word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
-            temp_qList = []
-            question = create_YN(s, word_Pos, Pos_word, dep_dict)
-            if question != '':
-                temp_qList.append(question)
+        # try:
+        #     senList1 = extract_bracket(sentence)
+        #     senList2 = []
+        #     for s in senList1:
+        #         senList2 += break_simple_andbut(s, 'but')
+        #     for s in senList2:
+        #         senList += break_simple_andbut(s, 'and')
+        # except:
+        #     pass
+        senList.append(sentence)
 
-            question = what_question(s, dep_list, pcfg, word_Pos, dep_dict)
-            if question != '':
-                temp_qList.append(question)
+        word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
+        try:
+            question, tag = create_YN(sentence, word_Pos, Pos_word, dep_dict)
+            question = format_question(question)
+            y_n_list.append((question, tag))
+        except:
+            pass
 
-            question = create_how(s)
-            if question != '':
-                temp_qList.append(question)
+        for sen in senList:
+            pcfg = stanford_pcfg(sen)
+            s = remove_clause(sen, pcfg)
+            dep_list = None
+            if s != sen:
+                dep_list, pcfg = stanford_parser(s)
+            else:
+                dep_list = stanford_dep(s)
 
-            questions = create_when(s)
-            if questions != []:
-                for q in questions:
-                    temp_qList.append(q)
-            
-            qList += temp_qList
-            count = len(qList)
+            if s != sentence:
+                word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
+			
+            try:
+                question = what_question(s, dep_list, pcfg, word_Pos, dep_dict)
+                if question != '':
+                    question = format_question(question)
+                    what_list.append(question)
+            except:
+                pass
 
-        if count >= nquestions:
-            break
+            try:
+                question = create_how(doc, s,dep_list)
+                if question != '':
+                    question = format_question(question)
+                    how_list.append(question)
+            except:
+                pass
+
+            try:
+                questions = create_when(s, dep_list, pcfg, dep_dict, doc)
+                if questions != []:
+                    for qt in questions:
+                        question = qt[0]
+                        tag = qt[1]
+                        qtype = qt[2]
+                        question = format_question(question)
+                        if qtype == 'Who':
+                            who_list.append((question, tag))
+                        elif qtype == 'When':
+                            when_list.append((question, tag))
+                        else:
+                            where_list.append((question, tag))
+            except:
+                pass
     
-    for i in range(nquestions):
+    qList = []
+    try:
+        qList = question_rank(nquestions, y_n_list, what_list, who_list, when_list, where_list, how_list)
+    except:
+        qList = y_n_list + who_list + when_list + where_list + how_list + what_list
+    
+    number = min(nquestions, len(qList))
+    for i in range(number):
         print(qList[i])
         
-
 if __name__ == "__main__":
     main()

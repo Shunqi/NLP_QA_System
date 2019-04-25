@@ -1,11 +1,14 @@
 #!/usr/bin/env python3 -W ignore::DeprecationWarning
 # -*- coding:utf8 -*-
 import sys
+import traceback
 sys.path.append('../')
 from util.sentence import *
 from util.parse_json import *
+from ask_func.generate_question import *
 from ask_func.rank import *
 from answer_func.answer_question import *
+from ask_func.rank_questions import *
 
 def question_type(question):
     question = question.lower()
@@ -31,33 +34,47 @@ def main():
     questions_file = sys.argv[2]
     questions = read_questions(questions_file)
     paragraphs = open_txt(article_file)
-    # questions = read_questions('questions_a1.txt')
-    # paragraphs = open_txt('../../data/Development_data/set1/a1.txt')
     sentences = tokenize_sentence(paragraphs)
+
     aList = []
     for k in range(len(questions)):
         question = questions[k]
-        scoreList = []
-        for i in range(0, len(sentences)):
-            sentence = sentences[i]
-            senList = [sentence]
-            for s in senList:
-                similarity = score(s, question, None, None)
-                scoreList.append((similarity, s))
-            
-        scoreList.sort(reverse=True)
         q_type = question_type(question)
-        s = scoreList[0][1]
-        answer = ''
+        answer = None
+
+        try:
+            answer = score_short(sentences, question)
+        except:
+            pass
+
+        if answer == None:
+            aList.append("No answer")
+            continue
+
         if q_type == "yn":
-            answer = answer_YN(s, question)
+            try:
+                answer = answer_YN(answer, question)
+            except:
+                pass
         elif q_type == "what":
-            answer = answer_what(s, question)
+            try:
+                answer = answer_what(answer, question)
+            except:
+                pass
         elif q_type == "how":
-            answer = answer_how(s, question)
+            try:
+                answer = answer_how(answer, question)
+            except:
+                pass
         else:
-            answer = answer_when(s, question)
-        aList.append(answer)
+            try:
+                answer = answer_when(answer, question)
+            except:
+                pass
+        try:
+            aList.append(format_answer(answer))
+        except:
+            aList.append(answer)
     
     for i in range(len(questions)):
         print(aList[i])
