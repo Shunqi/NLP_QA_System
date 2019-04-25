@@ -36,7 +36,7 @@ def answer_YN(s, q):
         if word not in JJ_word: # the word does not exists in original sentence
             target_word.append([word, JJ_word])
                     
-    if target_word: # if the list is empty
+    if not target_word: # if the list is empty
         if count%2 == 0:
             return "Yes"
         elif count == 1:
@@ -71,7 +71,7 @@ def answer_YN(s, q):
                     else:
                         return "Yes"
                 else: # word doesn't belong to any of those
-                    if i == len(word_s_list)-1:
+                    if i == len(target_word)-1:
                         if count%2 == 0:
                             return "Yes"
                         elif count ==1:
