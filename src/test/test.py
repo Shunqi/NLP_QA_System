@@ -276,7 +276,7 @@ def main():
     
 def test_ask():
     n = 20
-    paragraphs = open_txt('set1/a9.txt')
+    paragraphs = open_txt('set1/a7.txt')
     sentences = tokenize_sentence(paragraphs)
     sentences = select_sentence(sentences, n)
     # sentences = [
