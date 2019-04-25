@@ -36,7 +36,7 @@ def Spacy_parser(sentence):
     for ent in doc.ents:
         ner_list.append([ent.text, ent.label_])
         
-    if not ner_list: # if the list is not empty
+    if ner_list: # if the list is not empty
         NER = True
         
     for token in doc:        
