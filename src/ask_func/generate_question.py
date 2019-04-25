@@ -5,9 +5,6 @@ from util.parse_json import parse_json_sentences
 import random
 from answer_func.answer_question import *
 
-# the inputs are the original sentence and its POS tag list
-import random
-
 def create_YN(sentence, word_Pos, Pos_word, dep_dict):
     
     tag = 0 # 0 is easy and 1 is hard
@@ -83,7 +80,7 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
         if root_word =="cannot":        
             root_word = "can"
         result = root_word.capitalize() + " " + sentence + "?"
-        return result         
+        return result, tag         
     
     root_word_index = 0
     for i, x in enumerate(tokens):
@@ -98,7 +95,7 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
                 sentence = sentence.replace("cannot" + " ", "")
             sentence = sentence.replace(x + " ", "")
             result = x.capitalize() + " " + sentence + "?"
-            return result
+            return result, tag
 
     # there is no be_words, check what is the tense of the sentence
     # find the original word in word_Pos dict
