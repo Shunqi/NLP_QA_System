@@ -754,7 +754,8 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                         question = question.replace(" " + root_word, " " + root_word_lemma)
 
             question += "?"
-            questions.append((question, ent["level"], question_type))
+            if question.count(" ") > 4:
+                questions.append((question, ent["level"], question_type))
 
     return questions
 
