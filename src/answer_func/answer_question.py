@@ -259,7 +259,7 @@ def get_question_type(question):
     question = question.lower()
 
     # TODO: in which year? whom?
-    question_types = ["where", "when", "who"]
+    question_types = ["where", "when", "who", "whom", "which year", "which month", "whose", "which date"]
     question_index = []
 
     for q_type in question_types:
@@ -268,13 +268,29 @@ def get_question_type(question):
         else:
             question_index.append(question.find(q_type))
 
+    if question_index == []:
+        return "ELSE"
+
     question_type = question_types[question_index.index(min(question_index))]
 
-    # print(question_type)
-    return question_type
+    type_map = dict()
+    type_map['where'] = 'where'
+    type_map['when'] = 'when'
+    type_map['who'] = 'who'
+    type_map['whom'] = 'who'
+    type_map['which year'] = 'when'
+    type_map['which month'] = 'when'
+    type_map['whose'] = 'who'
+    type_map['which date'] = 'when'
+
+    return type_map[question_type]
 
 def answer_when(candidate, question):
     question_type = get_question_type(question)
+    
+    if question_type == 'ELSE':
+        return candidate
+        
     doc = nlp(candidate)
 
     ents = []
