@@ -14,7 +14,7 @@ def question_type(question):
     question = question.lower()
 
     # TODO: in which year? whom? 
-    question_types = ["where", "when", "who", "what", "how"]
+    question_types = ["where", "when", "who", "what", "how", "which"]
     question_index = []
     q_word = question.split(' ')[0]
     if q_word not in question_types:
