@@ -293,15 +293,15 @@ def test_ask():
         sentence = sentences[i]
         print(sentence)
         senList = []
-        # try:
-        #     senList1 = extract_bracket(sentence)
-        #     senList2 = []
-        #     for s in senList1:
-        #         senList2 += break_simple_andbut(s, 'but')
-        #     for s in senList2:
-        #         senList += break_simple_andbut(s, 'and')
-        # except:
-        #     traceback.print_exc()
+        try:
+            senList1 = extract_bracket(sentence)
+            senList2 = []
+            for s in senList1:
+                senList2 += break_simple_andbut(s, 'but')
+            for s in senList2:
+                senList += break_simple_andbut(s, 'and')
+        except:
+            traceback.print_exc()
         senList.append(sentence)
         sList = []
         qList = []
@@ -321,7 +321,7 @@ def test_ask():
 
         for s in senList:
             t1 = time.time()
-            dep_list, pcfg = stanford_parser(s)
+            pcfg = stanford_pcfg(s)
             s = remove_clause(s, pcfg)
             dep_list, pcfg = stanford_parser(s)
             t2 = time.time()
@@ -351,25 +351,25 @@ def test_ask():
             except:
                 traceback.print_exc()
 
-            try:
-                t1 = time.time()
-                questions = create_when(s)
-                if questions != []:
-                    for qt in questions:
-                        question = qt[0]
-                        tag = qt[1]
-                        qtype = qt[2]
-                        question = format_question(question)
-                        if qtype == 'Who':
-                            who_list.append((question, tag))
-                        elif qtype == 'When':
-                            when_list.append((question, tag))
-                        else:
-                            where_list.append((question, tag))
-                t2 = time.time()
-                print("whenandwho: "+str(t2-t1))
-            except:
-                traceback.print_exc()
+            # try:
+            #     t1 = time.time()
+            #     questions = create_when(s)
+            #     if questions != []:
+            #         for qt in questions:
+            #             question = qt[0]
+            #             tag = qt[1]
+            #             qtype = qt[2]
+            #             question = format_question(question)
+            #             if qtype == 'Who':
+            #                 who_list.append((question, tag))
+            #             elif qtype == 'When':
+            #                 when_list.append((question, tag))
+            #             else:
+            #                 where_list.append((question, tag))
+            #     t2 = time.time()
+            #     print("whenandwho: "+str(t2-t1))
+            # except:
+            #     traceback.print_exc()
 
     # print(y_n_list)
     # print(what_list)

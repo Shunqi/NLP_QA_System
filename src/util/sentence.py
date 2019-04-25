@@ -16,6 +16,15 @@ def stanford_parser(sentence):
     dep_list = list(dep.triples())
     return dep_list, pcfg
 
+def stanford_pcfg(sentence):
+    pcfg = pcfg_parser.raw_parse(sentence).__next__()
+    return pcfg
+
+def stanford_dep(sentence):
+    dep = dep_parser.raw_parse(sentence).__next__()
+    dep_list = list(dep.triples())
+    return dep_list
+
 #input should be a sentence
 def Spacy_parser(sentence): 
     from collections import Counter
