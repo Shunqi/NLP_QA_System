@@ -199,9 +199,10 @@ def replace_verb(question, verb, verb_s):
     return question
 
 def format_question(question):
+    punclist1 = ["'", ","]
     if question == None:
         return ''
-    words = [x for x in question.split() if x != "'"]
+    words = [x for x in question.split() if x not in punclist1]
     if len(words) < 1:
         return question
     words[0] = words[0].capitalize()
