@@ -415,45 +415,21 @@ def create_when(sentence):
     ent_type_map["LOCATION"] = "Where"
     ent_type_map["GPE"] = "Where"
 
-    dep_list, pcfg = stanford_parser(sentence)
     word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
-    if not NER:
-        return []
-    root_word, tag = dep_dict.get("ROOT")
     
-    # check conj sentences and remove them
-    conj_verb = ""
-    if "VB" in tag:
-        for dep in dep_list:
-            if dep[1] == "conj" and dep[0][0] == root_word:
-                conj_verb = dep[2][0]
-                break
-
-    if conj_verb != "":
-        index = sentence.find('and ' + conj_verb)
-        sentence = sentence[:index]
-        
-    doc = nlp(sentence)
-    
-    # check if contains entity
-    contain_candidate = False
+    contains_candidate = False
     for ent in doc.ents:
-        if ent.label_ in ent_type_map.keys():
-            contain_candidate = True
-            break
-    
-    if not contain_candidate:
-        return []
-
-    dep_list, pcfg = stanford_parser(sentence)
-    word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
-    root_word, tag = dep_dict.get("ROOT")
+        contains_candidate = True
+        break
         
-    # print("*" * 10)
-    # print(sentence)
-
+    if not contains_candidate:
+        return []
+    
+    root_word, tag = dep_dict.get("ROOT")
+    dep_list, pcfg = stanford_parser(sentence)
+    
     dependency = dep_list
-
+    
     keyword = ''
     copula = ''
     verb = ''
@@ -475,70 +451,64 @@ def create_when(sentence):
                 verb = dependency[i][0][0]
                 keyword_tag = dependency[i][2][1]
                 break
-
-    if copula == '' and verb != root_word and root_word != keyword and 'VB' in tag:
-        keyword = ''
-    if keyword == '':
-        verb = root_word
-
-    for i in range(len(dependency)):
-        if dependency[i][1] == 'aux':
-            aux = dependency[i][2][0]
-            break
-    if verb != '':
-        for i in range(len(dependency)):
-            if (dependency[i][1] == 'auxpass' and verb == dependency[i][0][0]):
-                auxpass = dependency[i][2][0]
-                break
-
-    # check first comma
+                
     subject = keyword
     
-    subject_index = sentence.find(subject + " ")
-    comma_index = sentence.find(",")
-    prev_comma_index = comma_index
-    # print(subject, subject_index, comma_index)
-    while comma_index != -1 and comma_index < subject_index:
-        prev_comma_index = comma_index
-        if sentence[comma_index + 1:].find(",") == -1:
-            break
-        comma_index += sentence[comma_index + 1:].find(",") + 1
-
-    if prev_comma_index < subject_index:
-        sentence = sentence[prev_comma_index + 1:]
-        
-    # print("*" * 10)
-    # print(sentence)
+    # print("1.", sentence)
     
-    sentence = sentence.strip()    
-    doc = nlp(sentence)
-
-    dep_list, pcfg = stanford_parser(sentence)
-    word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
-    root_word, tag = dep_dict.get("ROOT")
+    # remove clause before subject
+    before_subj = []
+    s_visited = False
+    subj_visited = False
     
-    # remove appositive
+    # remove extra VP
     extra_vp = []
+    prev = ""
     for tree in pcfg.subtrees():
+        if subj_visited and s_visited and tree.label() != 'ROOT' and before_subj == []:
+            if tree.label() == 'S':
+                s_visited = True
+            elif subject in tree.leaves():
+                subj_visited = True
+            else:
+                remove = ""
+                for word in tree.leaves():
+                    if word[0] != "\'":
+                        remove += " "
+                    remove += word
+                before_subj.append(remove)
+        
         if tree.label() == "VP" and root_word not in tree.leaves():
             remove = ""
             for word in tree.leaves():
-                if word[0] != "\'s":
+                if word[0] != "\'":
                     remove += " "
                 remove += word
-            extra_vp.append(", " + remove.strip() + ", ")
+            if prev in [",", "and", "before", "after"]:
+                remove = prev + " " + remove
+            extra_vp.append(remove.strip())
+            if len(tree.leaves()) != 1:
+                prev = tree.leaves()[0]
             
     for vp in extra_vp:
         sentence = sentence.replace(vp, "")
+        
+    # print(extra_vp)
 
     # print("*" * 10)
-    # print(sentence)
+    # print("2.", sentence)
     # last parse?
+    
     doc = nlp(sentence)
-
+    contains_candidate = False
+    for ent in doc.ents:
+        contains_candidate = True
+        break
+        
+    if not contains_candidate:
+        return []
+        
     dep_list, pcfg = stanford_parser(sentence)
-    word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
-    root_word, tag = dep_dict.get("ROOT")
     
     dependency = dep_list
 
@@ -582,6 +552,11 @@ def create_when(sentence):
     ents = []
 
     for ent in doc.ents:
+        if ent.label_ not in candidate:
+            continue
+        if ent.text + "'" in sentence:
+            continue
+            
         if len(ents) == 0:
             e = dict()
             e['text'] = ent.text
@@ -592,12 +567,12 @@ def create_when(sentence):
             ents.append(e)
         else:
             prev = ents[-1]
-            if ent.start_char - prev['end'] < 3 and prev['label'] == ent.label_:
-                prev['text'] += " " + ent.text
+            if ent.start_char - prev['end'] < 4 and prev['label'] == ent.label_:
+                prev['text'] += sentence[prev['end']:ent.end_char]
                 prev['end'] = ent.end_char
                 prev['level'] = 1
             elif ent.start_char - prev['end'] < 8 and prev['label'] == ent.label_ and "and" in sentence[prev['end']:ent.start_char]:
-                prev['text'] += " " + ent.text
+                prev['text'] += sentence[prev['end']:ent.end_char]
                 prev['end'] = ent.end_char
                 prev['level'] = 1
             else:
@@ -607,9 +582,16 @@ def create_when(sentence):
                 e['end'] = ent.end_char
                 e['label'] = ent.label_
                 e['level'] = 0
-                ents.append(e)
+                ents.append(e) 
+                
+    # print(ents)
 
-    
+    prep = [" in ", " at ", " on "]
+    for ent in ents:
+        if sentence[ent["start"] - 4:ent["start"]] in prep:
+            ent["start"] = ent["start"] - 3
+            
+    subject = keyword
 
     for ent in ents:
         question_type = ""
@@ -643,7 +625,7 @@ def create_when(sentence):
                 if verb_first:
                     is_be = root_word in be_words
                     if is_be:
-                        q_verb = " " + root_word
+                        q_verb = " " + root_word + " "
                     else:
                         if aux != "" or auxpass != "":
                             if aux == "":
