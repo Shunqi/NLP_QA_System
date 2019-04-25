@@ -122,11 +122,10 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
 
     return result, tag
 
-def what_question(sentence, dependency, pas, word_Pos, dep_dict):
+def what_question(sentence, dependency, pas, word_Pos, dep_dict, doc):
     be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have',
                 'had', 'has']
     neg_rb = ['however', 'but', 'yet', 'often']
-    doc = nlp(sentence)
     # for ent in doc.ents:
     #     print(ent.text, ent.start_char, ent.end_char, ent.label_)
     # there is no be_words, check what is the tense of the sentence
@@ -403,6 +402,7 @@ def gen_question_type3(doc,obj,dep_list):
 
 def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have', 'had', 'has']
+    neg_rb = ['however', 'but', 'yet', 'often']
     candidate = ["PERSON", "ORG", "DATE", "TIME", "LOCATION", "GPE"]
     pron = ["i", "you", "he", "she", "it", "they", "another", "each", "everything", "nobody", "either", "someone"]
     
@@ -446,6 +446,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     before_subj = []
     s_visited = False
     subj_visited = False
+    remove_index = -1
     
     # remove extra VP
     extra_vp = []
@@ -455,7 +456,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
             s_visited = True
             continue
             
-        if not subj_visited and s_visited and before_subj == []:
+        if not subj_visited and s_visited:
             if subject in tree.leaves():
                 subj_visited = True
             else:
@@ -464,7 +465,11 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                     if word[0].isalnum():
                         remove += " "
                     remove += word
-                before_subj.append(remove.strip())
+                remove = remove.strip()
+                new_remove_index = sentence.find(remove) + len(remove)
+                if remove != "," and new_remove_index > remove_index:
+                    before_subj.append(remove.strip())
+                    remove_index = new_remove_index
         
         if tree.label() in ['CC', 'IN', ","]:
             prev = tree.leaves()[0]
@@ -493,7 +498,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     for j in range(len(sentence)):
         if sentence[len(sentence) - 1 - j].isalnum():
             break
-    sentence = sentence[i:len(sentence) - 1 - j] + "."
+    sentence = sentence[i:len(sentence) - j] + "."
         
     # print(extra_vp)
 
@@ -515,6 +520,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     
     dependency = dep_list
 
+    dobj = ""    
     keyword = ''
     copula = ''
     verb = ''
@@ -535,6 +541,11 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                 keyword = dependency[i][2][0]
                 verb = dependency[i][0][0]
                 keyword_tag = dependency[i][2][1]
+                break
+
+        for i in range(len(dependency)):
+            if dependency[i][1] == 'dobj':
+                dobj = dependency[i][2][0]
                 break
 
     if copula == '' and verb != root_word and root_word != keyword and 'VB' in tag:
@@ -590,7 +601,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     # print(ents)
     
     new_ents = []
-    prep = [" in ", " at ", " on ", " near ", " beside ", " around "]
+    prep = [" in ", " at ", " on ", " near ", " beside ", " around ", " after "]
     for ent in ents:
         # no space before it
         if ent['start'] < 2 or ent['label'] in ['PERSON', 'ORG']:
@@ -602,8 +613,21 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
             ent["start"] = last_space + 1
             new_ents.append(ent)
 
+    # initialize variables
     ents = new_ents
     subject = keyword
+    
+    first_word = sentence[:sentence.find(" ")]
+    lower_first = True
+    if first_word != "I":
+        lower_first = False
+    for token in doc:
+        if token.text == first_word:
+            if token.tag_ == "NNP":
+                lower_first = False
+            break
+    if lower_first:
+        sentence = sentence[0].lower() + sentence[1:]
 
     for ent in ents:
         question_type = ""
@@ -626,11 +650,15 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                 # subject + non-be -> ask for the subject
                 is_be = root_word in be_words
                 if is_be:
-                    question += " " + root_word + " " + ent['text']
-                else:            
+                    continue
+                    # question += " " + root_word + " " + ent['text']
+                else:
                     question += " " + sentence[0:start_char]
                     question += sentence[end_char:-1]
             else:
+                if question_type == "Who" and (dobj == "" or dobj not in ent['text']):
+                    continue
+                    
                 if ent['label'] == "ORG":
                     continue
                     
@@ -755,6 +783,8 @@ def checkValidSentence(sentence, dependency, pas):
     return isSentence and hasSubj
 
 def extract_bracket(sentence):
+    if sentence.count('(') != sentence.count(')'):
+        return sentence
     left = [i for i, a in enumerate(sentence) if a == '(']
     right = [i for i, a in enumerate(sentence) if a == ')']
     senList = []
@@ -768,7 +798,7 @@ def extract_bracket(sentence):
         #     senList.append(brackSentence)
     oldSentence += sentence[start:]
     senList.append(oldSentence)
-    return senList
+    return oldSentence
 
 def break_simple_andbut(sentence, andORbut):
     senList = []

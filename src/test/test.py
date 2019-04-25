@@ -303,9 +303,6 @@ def test_ask():
         except:
             traceback.print_exc()
         senList.append(sentence)
-        sList = []
-        qList = []
-        aList = []
 
         word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
         try:
@@ -333,7 +330,7 @@ def test_ask():
 			
             try:
                 t1 = time.time()
-                question = what_question(s, dep_list, pcfg, word_Pos, dep_dict)
+                question = what_question(s, dep_list, pcfg, word_Pos, dep_dict, doc)
                 if question != '':
                     question = format_question(question)
                     what_list.append(question)

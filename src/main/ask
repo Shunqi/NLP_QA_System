@@ -27,10 +27,9 @@ def main():
         sentence = sentences[i]
         senList = []
         try:
-            senList1 = extract_bracket(sentence)
+            sentence1 = extract_bracket(sentence)
             senList2 = []
-            for s in senList1:
-                senList2 += break_simple_andbut(s, 'but')
+            senList2 += break_simple_andbut(sentence1, 'but')
             for s in senList2:
                 senList += break_simple_andbut(s, 'and')
         except:
@@ -59,7 +58,7 @@ def main():
                 word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
 			
             try:
-                question = what_question(s, dep_list, pcfg, word_Pos, dep_dict)
+                question = what_question(s, dep_list, pcfg, word_Pos, dep_dict, doc)
                 if question != '':
                     question = format_question(question)
                     what_list.append(question)
