@@ -294,15 +294,13 @@ def test_ask():
         print(sentence)
         senList = []
         try:
-            senList1 = extract_bracket(sentence)
+            sentence1 = extract_bracket(sentence)
             senList2 = []
-            for s in senList1:
-                senList2 += break_simple_andbut(s, 'but')
+            senList2 += break_simple_andbut(sentence1, 'but')
             for s in senList2:
                 senList += break_simple_andbut(s, 'and')
         except:
-            traceback.print_exc()
-        senList.append(sentence)
+            senList.append(sentence)
 
         word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
         try:
@@ -316,17 +314,17 @@ def test_ask():
             traceback.print_exc()
 
 
-        for s in senList:
-            t1 = time.time()
-            pcfg = stanford_pcfg(s)
-            t2 = time.time()
-            print("parse: "+str(t2-t1))
-            s = remove_clause(s, pcfg)
-            t1 = time.time()
-            dep_list, pcfg = stanford_parser(s)
-            t2 = time.time()
-            print("parse: "+str(t2-t1))
-            word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
+        for sen in senList:
+            pcfg = stanford_pcfg(sen)
+            s = remove_clause(sen, pcfg)
+            dep_list = None
+            if s != sen:
+                dep_list, pcfg = stanford_parser(s)
+            else:
+                dep_list = stanford_dep(s)
+
+            if s != sentence:
+                word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
 			
             try:
                 t1 = time.time()
