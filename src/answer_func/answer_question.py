@@ -203,7 +203,7 @@ def get_lemma(word):
     lemma = token[0].lemma_
     return lemma
 
-def answer_how(question, sentence):
+def answer_how(sentence, question):
     noun = get_noun(question)
     if noun is None:
         card_list = locate_cardinal2(sentence)

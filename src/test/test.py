@@ -96,7 +96,7 @@ def test_what():
             if question != '':
                 question = format_question(question)
                 temp_qList.append(question)
-
+            
             qList.append(temp_qList)
 
         for i in range(len(sList)):
@@ -111,7 +111,7 @@ def test_match():
         'What is the Old Kingdom?', 'What is the basic justification for a separation between the two periods?',
         'What did they also perceive?'
     ]
-
+    
     for k in range(len(questions)):
         question = questions[k]
         scoreList = []
@@ -128,8 +128,8 @@ def test_match():
             senList = []
             for s in senList2:
                 senList += break_simple_andbut(s, 'and')
-
-
+            
+            
             for s in senList:
                 dep_list, pcfg = stanford_parser(s)
                 word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
@@ -143,7 +143,7 @@ def test_match():
 # def question_type(question):
 #     question = question.lower()
 
-#     # TODO: in which year? whom?
+#     # TODO: in which year? whom? 
 #     question_types = ["where", "when", "who", "what", "how"]
 #     question_index = []
 #     q_word = question.split(' ')[0]
@@ -181,7 +181,7 @@ def test_match():
 #             for s in senList:
 #                 similarity = score(s, question, None, None)
 #                 scoreList.append((similarity, s))
-
+            
 #         scoreList.sort(reverse=True)
 #         q_type = question_type(question)
 #         s = scoreList[0][1]
@@ -191,18 +191,18 @@ def test_match():
 #         elif q_type == "what":
 #             answer = answer_what(s, question)
 #         elif q_type == "how":
-#             answer = answer_how(question, s)
+#             answer = answer_how(s, question)
 #         else:
 #             answer = answer_when(s, question)
 #         aList.append(answer)
 #         sList.append(s)
-
+    
     # for i in range(10):
     #     print('*'*60)
     #     print('Q:', questions[i])
     #     print('A:', aList[i])
     #     print('S:', sList[i])
-
+        
 
 def main():
     # paragraphs = open_html('../../data/Development_data/set1/a1.htm')
@@ -252,7 +252,7 @@ def main():
             question = create_how(doc,s)
             if question != '':
                 temp_qList.append(question)
-                # answer = answer_how(question, s)
+                # answer = answer_how(s, question)
                 # temp_aList.append(answer)
 
             questions = create_when(s)
@@ -261,7 +261,7 @@ def main():
                     temp_qList.append(q)
                     # answer = answer_when(s, q)
                     # temp_aList.append(answer)
-
+            
             qList.append(temp_qList)
             # aList.append(temp_aList)
 
@@ -273,10 +273,10 @@ def main():
                 # print(qList[i][j], file=outputfile)
                 # print('A:', aList[i][j])
     # outputfile.close()
-
+    
 def test_ask():
     n = 10
-    paragraphs = open_txt('set3/a10.txt')
+    paragraphs = open_txt('set3/a9.txt')
     sentences = tokenize_sentence(paragraphs)
     sentences = select_sentence(sentences, n)
     # sentences = [
@@ -320,7 +320,7 @@ def test_ask():
             s = remove_clause(s, pcfg)
             dep_list, pcfg = stanford_parser(s)
             word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
-
+			
             try:
                 t1 = time.time()
                 question = what_question(s, dep_list, pcfg, word_Pos, dep_dict)
@@ -329,7 +329,7 @@ def test_ask():
                     what_list.append(question)
                 t2 = time.time()
                 print("what: "+str(t2-t1))
-
+            	
             except:
                 traceback.print_exc()
 
@@ -377,7 +377,7 @@ def test_ask():
 def question_type(question):
     question = question.lower()
 
-    # TODO: in which year? whom?
+    # TODO: in which year? whom? 
     question_types = ["where", "when", "who", "what", "how"]
     question_index = []
     q_word = question.split(' ')[0]
@@ -394,8 +394,8 @@ def question_type(question):
         return question_type
 
 def test_answer():
-    questions = read_questions('question1.txt')
-    paragraphs = open_txt('set1/a4.txt')
+    questions = read_questions('questions_a4.txt')
+    paragraphs = open_txt('../../data/Test_data/set1/a4.txt')
     sentences = tokenize_sentence(paragraphs)
     aList = []
     tList = []
@@ -412,7 +412,7 @@ def test_answer():
             #     similarity = score_spacy(sentence, question)
             #     print(similarity)
             #     scoreList.append((similarity, sentence))
-
+                
             # scoreList.sort(reverse=True)
             # q_type = question_type(question)
             # s = scoreList[0][1]
@@ -433,11 +433,11 @@ def test_answer():
         elif q_type == "what":
             answer = answer_what(answer, question)
         elif q_type == "how":
-            answer = answer_how(question, answer)
+            answer = answer_how(answer, question)
         else:
             answer = answer_when(answer, question)
         aList.append(format_answer(answer))
-
+    
     for i in range(len(questions)):
         print(questions[i])
         print(tList[i])
@@ -448,5 +448,5 @@ if __name__ == "__main__":
     # test_what()
     # test_match()
     # remove_clause()
-     test_ask()
-    #test_answer()
+     #test_ask()
+    test_answer()
