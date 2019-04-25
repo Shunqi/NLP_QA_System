@@ -656,7 +656,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     # print(ents)
     
     new_ents = []
-    prep = [" in ", " at ", " on ", " near ", " beside ", " around ", " after "]
+    prep = [" in ", " at ", " on ", " near ", " beside ", " around ", " after ", " since "]
     for ent in ents:
         # no space before it
         if ent['start'] < 2 or ent['label'] in ['PERSON', 'ORG']:
@@ -672,9 +672,10 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     ents = new_ents
     subject = keyword
     
+    # lower the case of first char
     first_word = sentence[:sentence.find(" ")]
     lower_first = True
-    if first_word != "I":
+    if first_word == "I":
         lower_first = False
     for token in doc:
         if token.text == first_word:
@@ -706,7 +707,8 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                 is_be = root_word in be_words
                 if is_be:
                     continue
-                    # question += " " + root_word + " " + ent['text']
+                    # question += " " + root_word + " "
+                    
                 else:
                     question += " " + sentence[0:start_char]
                     question += sentence[end_char:-1]
@@ -781,6 +783,18 @@ def countable_noun(noun):
 
 
 def select_question(doc,sentence,dep_list):
+    if sentence.count(',') == 1:
+        if sentence.find(',') < sentence.find(get_nsubj(dep_list)):
+            sen1 = sentence[:sentence.find(',')]
+            sen2 = sentence[sentence.find(','):]
+            s2 = get_entity(nlp(sen2[1:]))
+            if 'MONEY' in s2 or 'CARDINAL' in s2 or 'PERCENT' in s2 or 'QUANTITY' in s2:
+                select_question(nlp(sen2[1:]),sen2[1:],dep_list)
+            else:
+                s1 = nlp(sen1)
+                if 'CARDINAL' in get_entity(s1) and s1[0].text.lower() in ['after','during','in','since']:
+                    q = s1[0].text + ' how many ' + list(get_namechunks(s1).values())[-1]+sen2
+                    return q
     obj = ''
     ner = get_entity(doc)
     root = get_ROOT(doc)
