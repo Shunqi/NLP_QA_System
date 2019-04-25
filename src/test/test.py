@@ -322,7 +322,10 @@ def test_ask():
         for s in senList:
             t1 = time.time()
             pcfg = stanford_pcfg(s)
+            t2 = time.time()
+            print("parse: "+str(t2-t1))
             s = remove_clause(s, pcfg)
+            t1 = time.time()
             dep_list, pcfg = stanford_parser(s)
             t2 = time.time()
             print("parse: "+str(t2-t1))
@@ -351,25 +354,25 @@ def test_ask():
             except:
                 traceback.print_exc()
 
-            # try:
-            #     t1 = time.time()
-            #     questions = create_when(s)
-            #     if questions != []:
-            #         for qt in questions:
-            #             question = qt[0]
-            #             tag = qt[1]
-            #             qtype = qt[2]
-            #             question = format_question(question)
-            #             if qtype == 'Who':
-            #                 who_list.append((question, tag))
-            #             elif qtype == 'When':
-            #                 when_list.append((question, tag))
-            #             else:
-            #                 where_list.append((question, tag))
-            #     t2 = time.time()
-            #     print("whenandwho: "+str(t2-t1))
-            # except:
-            #     traceback.print_exc()
+            try:
+                t1 = time.time()
+                questions = create_when(s, dep_list, pcfg, dep_dict, doc)
+                if questions != []:
+                    for qt in questions:
+                        question = qt[0]
+                        tag = qt[1]
+                        qtype = qt[2]
+                        question = format_question(question)
+                        if qtype == 'Who':
+                            who_list.append((question, tag))
+                        elif qtype == 'When':
+                            when_list.append((question, tag))
+                        else:
+                            where_list.append((question, tag))
+                t2 = time.time()
+                print("whenandwho: "+str(t2-t1))
+            except:
+                traceback.print_exc()
 
     # print(y_n_list)
     # print(what_list)
