@@ -249,7 +249,7 @@ def main():
                 # answer = answer_what(s, question, dep_list, pcfg, word_Pos, dep_dict)
                 # temp_aList.append(answer)
 
-            question = create_how(doc,s)
+            question = create_how(doc,s,dep_list)
             if question != '':
                 temp_qList.append(question)
                 # answer = answer_how(s, question)
@@ -276,7 +276,7 @@ def main():
     
 def test_ask():
     n = 20
-    paragraphs = open_txt('../../data/Test_data/set1/a5.txt')
+    paragraphs = open_txt('set1/a9.txt')
     sentences = tokenize_sentence(paragraphs)
     sentences = select_sentence(sentences, n)
     # sentences = [
@@ -345,7 +345,7 @@ def test_ask():
 
             try:
                 t1 = time.time()
-                question = create_how(doc, s)
+                question = create_how(doc, s,dep_list)
                 if question != '':
                     question = format_question(question)
                     how_list.append(question)
@@ -437,13 +437,25 @@ def test_answer():
         tList.append(target)
 
         if q_type == "yn":
-            answer = answer_YN(answer, question)
+            try:
+                answer = answer_YN(answer, question)
+            except:
+                traceback.print_exc()
         elif q_type == "what":
-            answer = answer_what(answer, question)
+            try:
+                answer = answer_what(answer, question)
+            except:
+                traceback.print_exc()
         elif q_type == "how":
-            answer = answer_how(answer, question)
+            try:
+                answer = answer_how(answer, question)
+            except:
+                traceback.print_exc()
         else:
-            answer = answer_when(answer, question)
+            try:
+                answer = answer_when(answer, question)
+            except:
+                traceback.print_exc()
         aList.append(format_answer(answer))
     
     for i in range(len(questions)):
