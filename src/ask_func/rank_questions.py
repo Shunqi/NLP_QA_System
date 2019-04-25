@@ -4,7 +4,7 @@ def question_rank(n, y_n_list, what_list, who_list, when_list, where_list, how_l
     count = 0
     result_question = []
 
-    tough_max = int(n * 0.5)
+    tough_max = int(n * 0.4)
     # assign 50% to tough questions
     # 1 is tough question and 0 easy question
 
