@@ -27,26 +27,19 @@ def stanford_dep(sentence):
 
 #input should be a sentence
 def Spacy_parser(sentence): 
-    from collections import Counter
-    import spacy
-    import pandas as pd
-    #from tabulate import tabulate
-    
+
+    #from tabulate import tabulate    
     word_Pos = {}
     Pos_word = {}
     dep_dict = {} # dict for dependency 
     ner_list = []
     NER = False # boolean value
 
-    nlp = spacy.load('en_core_web_lg')
-
     doc = nlp(sentence)
     
     for ent in doc.ents:
-        ner_list.append([ent.text, ent.label_])
-        
-    if ner_list: # if the list is not empty
-        NER = True
+		NER = True 
+		break
         
     for token in doc:        
         # update the dict with the word as key
