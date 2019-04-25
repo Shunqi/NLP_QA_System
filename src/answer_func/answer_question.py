@@ -220,7 +220,7 @@ def calculate_word_distance(lemma, card, sentence):
     else:
         return abs(card_idx - obj_idx)
 
-def answer_how(question, sentence):
+def answer_how(sentence, question):
     noun = get_noun(question)
     if noun is None:
         card_list = locate_cardinal2(sentence)
