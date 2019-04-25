@@ -10,27 +10,27 @@ def answer_YN(s, q):
     words = ['not','n','no','cannot']
     count = 0 # number of negative words
     JJ_word =[]
-    
-    for token in doc:        
+
+    for token in doc:
         if token.text.lower() in words:
             count +=1
         if token.tag_ =="JJ":
             JJ_word.append(token.text) # update the ADJ word in list
-    
+
     JJ_word_q = []
-    doc_q = nlp(q) # tokenize the question 
-    for token in doc_q:        
-        if token.tag_ == "JJ": # there is an adjective word 
-            JJ_word_q.append(token.text)         
-        
+    doc_q = nlp(q) # tokenize the question
+    for token in doc_q:
+        if token.tag_ == "JJ": # there is an adjective word
+            JJ_word_q.append(token.text)
+
     if not JJ_word_q:
         if count%2 == 0:
             return "Yes"
         else:
             return "No"
-            
+
     target_word = []
-    
+
     for i, word in enumerate(JJ_word_q):
         if word not in JJ_word: # the word does not exists in original sentence
             target_word.append([word, JJ_word])
@@ -43,24 +43,24 @@ def answer_YN(s, q):
             return 'No'
         else:
             return "No"
-        
+
     else: # the list is not empty
-        
+
         for i, words in enumerate(target_word):
             word_q = words[0]
             word_s_list = words[1] # it's a list
-            
+
             wordnet = word_net(word_q)
             synonyms = wordnet[0]
             antonyms =  wordnet[1]
-        
+
             for word in word_s_list:
                 if word in synonyms: # if the words are synonyms
                     if i == len(target_word)-1:
                         if count%2 == 0:
                             return "Yes"
                         else:
-                            return "No"                    
+                            return "No"
                     else:
                          continue
                 elif word in antonyms: # if the words are antonyms
@@ -71,7 +71,7 @@ def answer_YN(s, q):
                     else:
                         return "Yes"
                 else: # word doesn't belong to any of those
-                    continue 
+                    continue
 
 
 def word_net(word):  # input is a word
@@ -131,7 +131,7 @@ def answer_what(sentence, question):
             if (dependency[i][1] == 'auxpass' and verb == dependency[i][0][0]):
                 auxpass = dependency[i][2][0]
                 break
-    
+
     keyphrase = None
     if keyword != '':
         for s in pas.subtrees():
@@ -203,7 +203,24 @@ def get_lemma(word):
     lemma = token[0].lemma_
     return lemma
 
-def answer_how(sentence, question):
+def calculate_word_distance(lemma, card, sentence):
+    sentence_token = nlp(sentence)
+    idx = 0
+    obj_idx = 0
+    card_idx = sentence.find(card)
+    for s in sentence_token:
+        #print(s.text)
+        if s.lemma_ == lemma:
+            obj_idx = idx
+#         if s.text == card:
+#             card_idx = idx
+        idx += 1
+    if card_idx - obj_idx == 0:
+        return 9999
+    else:
+        return abs(card_idx - obj_idx)
+
+def answer_how(question, sentence):
     noun = get_noun(question)
     if noun is None:
         card_list = locate_cardinal2(sentence)
@@ -211,7 +228,7 @@ def answer_how(sentence, question):
             return card_list[0]
         else:
             return sentence
-           
+
     else:
         noun_lemma = get_lemma(noun)
         if 'how much' in question.lower():
@@ -233,7 +250,7 @@ def answer_how(sentence, question):
 def get_question_type(question):
     question = question.lower()
 
-    # TODO: in which year? whom? 
+    # TODO: in which year? whom?
     question_types = ["where", "when", "who"]
     question_index = []
 
@@ -289,9 +306,9 @@ def answer_when(candidate, question):
     for ent in ents:
         if ent['label'] in type_label_map[question_type] and ent['text'] not in question:
             return ent['text']
-    
+
     for ent in doc.ents:
         if ent.label_ in type_label_map[question_type] and ent.text not in question:
             return ent.text
-    
+
     return candidate
