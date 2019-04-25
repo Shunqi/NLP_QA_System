@@ -1,8 +1,8 @@
 import sys
 sys.path.append('../')
 from util.sentence import *
-from util.parse_json import parse_json_sentences
-import random
+#from util.parse_json import parse_json_sentences
+#import random
 from answer_func.answer_question import *
 
 def create_YN(sentence, word_Pos, Pos_word, dep_dict, dep_list, pcfg):
