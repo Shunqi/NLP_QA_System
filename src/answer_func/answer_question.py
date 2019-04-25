@@ -264,12 +264,12 @@ def answer_when(candidate, question):
             ents.append(e)
         else:
             prev = ents[-1]
-            if ent.start_char - prev['end'] < 3 and prev['label'] == ent.label_:
-                prev['text'] += " " + ent.text
+            if ent.start_char - prev['end'] < 4 and prev['label'] == ent.label_:
+                prev['text'] += candidate[prev['end']:ent.end_char]
                 prev['end'] = ent.end_char
                 prev['level'] = 1
             elif ent.start_char - prev['end'] < 8 and prev['label'] == ent.label_ and "and" in candidate[prev['end']:ent.start_char]:
-                prev['text'] += " " + ent.text
+                prev['text'] += candidate[prev['end']:ent.end_char]
                 prev['end'] = ent.end_char
                 prev['level'] = 1
             else:
