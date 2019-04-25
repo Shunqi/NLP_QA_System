@@ -420,21 +420,11 @@ def create_when(sentence):
     if conj_verb != "":
         index = sentence.find('and ' + conj_verb)
         sentence = sentence[:index]
-        
-    doc = nlp(sentence)
-    
-    # check if contains entity
-    contain_candidate = False
-    for ent in doc.ents:
-        if ent.label_ in ent_type_map.keys():
-            contain_candidate = True
-            break
-    
-    if not contain_candidate:
-        return []
 
     dep_list, pcfg = stanford_parser(sentence)
     word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
+    if not NER:
+        return []
     root_word, tag = dep_dict.get("ROOT")
         
     # print("*" * 10)
@@ -570,6 +560,11 @@ def create_when(sentence):
     ents = []
 
     for ent in doc.ents:
+        if ent.label_ not in candidate:
+            continue
+        if ent.text + "'" in sentence:
+            continue
+            
         if len(ents) == 0:
             e = dict()
             e['text'] = ent.text
@@ -580,12 +575,12 @@ def create_when(sentence):
             ents.append(e)
         else:
             prev = ents[-1]
-            if ent.start_char - prev['end'] < 3 and prev['label'] == ent.label_:
-                prev['text'] += " " + ent.text
+            if ent.start_char - prev['end'] < 4 and prev['label'] == ent.label_:
+                prev['text'] += sentence[prev['end']:ent.end_char]
                 prev['end'] = ent.end_char
                 prev['level'] = 1
             elif ent.start_char - prev['end'] < 8 and prev['label'] == ent.label_ and "and" in sentence[prev['end']:ent.start_char]:
-                prev['text'] += " " + ent.text
+                prev['text'] += sentence[prev['end']:ent.end_char]
                 prev['end'] = ent.end_char
                 prev['level'] = 1
             else:
@@ -595,9 +590,12 @@ def create_when(sentence):
                 e['end'] = ent.end_char
                 e['label'] = ent.label_
                 e['level'] = 0
-                ents.append(e)
+                ents.append(e) 
 
-    
+    prep = [" in ", " at ", " on "]
+    for ent in ents:
+        if sentence[ent["start"] - 4:ent["start"]] in prep:
+            ent["start"] = ent["start"] - 3
 
     for ent in ents:
         question_type = ""
@@ -631,7 +629,7 @@ def create_when(sentence):
                 if verb_first:
                     is_be = root_word in be_words
                     if is_be:
-                        q_verb = " " + root_word
+                        q_verb = " " + root_word + " "
                     else:
                         if aux != "" or auxpass != "":
                             if aux == "":
