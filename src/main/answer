@@ -12,13 +12,16 @@ from ask_func.rank_questions import *
 
 def question_type(question):
     question = question.lower()
-
-    # TODO: in which year? whom? 
-    question_types = ["where", "when", "who", "what", "how", "which", "why"]
+    question_types = ["where", "when", "who", "what", "how", "which"]
+    yn_types = ['cannot','is', 'are', 'were', 'was', 'am', 'can', 'could', \
+                'must', 'may', 'will', 'would', 'have', 'had', 'has', 'do', 'did', 'does']
     question_index = []
     q_word = question.split(' ')[0]
     if q_word not in question_types:
-        return "yn"
+        if q_word in yn_types:
+            return "yn"
+        else:
+            return "unknow"
     else:
         for q_type in question_types:
             if question.find(q_type) < 0:
@@ -63,7 +66,6 @@ def main():
 
         target = answer
         tList.append(answer)
-
         if q_type == "yn":
             try:
                 answer = answer_YN(answer, question)
@@ -79,6 +81,8 @@ def main():
                 answer = answer_how(answer, question)
             except:
                 pass
+        elif q_type == "unknow":
+            pass
         else:
             try:
                 answer = answer_when(answer, question)
