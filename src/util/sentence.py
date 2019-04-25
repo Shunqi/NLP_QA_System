@@ -209,6 +209,10 @@ def format_question(question):
         words = words[:len(words)-1]
         words[len(words)-1] = words[len(words)-1] + '?'
     question = " ".join(words)
+
+    punclist = [',', '.', '!']
+    if question[:len(question)-2] in punclist:
+        question = question[:len(question)-2] + '?'
     return question
 
 def format_answer(answer):

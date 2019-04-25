@@ -122,11 +122,10 @@ def create_YN(sentence, word_Pos, Pos_word, dep_dict):
 
     return result, tag
 
-def what_question(sentence, dependency, pas, word_Pos, dep_dict):
+def what_question(sentence, dependency, pas, word_Pos, dep_dict, doc):
     be_words = ['cannot', 'is', 'are', 'were', 'was', 'am', 'can', 'could', 'must', 'may', 'will', 'would', 'have',
                 'had', 'has']
     neg_rb = ['however', 'but', 'yet', 'often']
-    doc = nlp(sentence)
     # for ent in doc.ents:
     #     print(ent.text, ent.start_char, ent.end_char, ent.label_)
     # there is no be_words, check what is the tense of the sentence
@@ -755,6 +754,8 @@ def checkValidSentence(sentence, dependency, pas):
     return isSentence and hasSubj
 
 def extract_bracket(sentence):
+    if sentence.count('(') != sentence.count(')'):
+        return sentence
     left = [i for i, a in enumerate(sentence) if a == '(']
     right = [i for i, a in enumerate(sentence) if a == ')']
     senList = []
@@ -768,7 +769,7 @@ def extract_bracket(sentence):
         #     senList.append(brackSentence)
     oldSentence += sentence[start:]
     senList.append(oldSentence)
-    return senList
+    return oldSentence
 
 def break_simple_andbut(sentence, andORbut):
     senList = []
