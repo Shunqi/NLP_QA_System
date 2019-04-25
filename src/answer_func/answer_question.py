@@ -34,7 +34,7 @@ def answer_YN(s, q):
     for i, word in enumerate(JJ_word_q):
         if word not in JJ_word: # the word does not exists in original sentence
             target_word.append([word, JJ_word])
-    print(target_word)
+    # print(target_word)
                 
     if not target_word: # if the list is empty
         if count%2 == 0:
