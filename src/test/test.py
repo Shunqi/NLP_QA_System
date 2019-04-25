@@ -275,8 +275,8 @@ def main():
     # outputfile.close()
     
 def test_ask():
-    n = 10
-    paragraphs = open_txt('set3/a9.txt')
+    n = 20
+    paragraphs = open_txt('../../data/Test_data/set1/a5.txt')
     sentences = tokenize_sentence(paragraphs)
     sentences = select_sentence(sentences, n)
     # sentences = [
@@ -293,32 +293,39 @@ def test_ask():
         sentence = sentences[i]
         print(sentence)
         senList = []
-        try:
-            senList1 = extract_bracket(sentence)
-            senList2 = []
-            for s in senList1:
-                senList2 += break_simple_andbut(s, 'but')
-            for s in senList2:
-                senList += break_simple_andbut(s, 'and')
-        except:
-            traceback.print_exc()
+        # try:
+        #     senList1 = extract_bracket(sentence)
+        #     senList2 = []
+        #     for s in senList1:
+        #         senList2 += break_simple_andbut(s, 'but')
+        #     for s in senList2:
+        #         senList += break_simple_andbut(s, 'and')
+        # except:
+        #     traceback.print_exc()
+        senList.append(sentence)
         sList = []
         qList = []
         aList = []
 
         word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(sentence)
         try:
+            t1 = time.time()
             question, tag = create_YN(sentence, word_Pos, Pos_word, dep_dict)
             question = format_question(question)
             y_n_list.append((question, tag))
+            t2 = time.time()
+            print("yn: "+str(t2-t1))
         except:
             traceback.print_exc()
 
 
         for s in senList:
+            t1 = time.time()
             dep_list, pcfg = stanford_parser(s)
             s = remove_clause(s, pcfg)
             dep_list, pcfg = stanford_parser(s)
+            t2 = time.time()
+            print("parse: "+str(t2-t1))
             word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
 			
             try:
@@ -405,21 +412,19 @@ def test_answer():
         q_type = question_type(question)
         answer = ''
         target = ''
-        if len(question.split()) > 7:
-            # scoreList = []
-            # for i in range(0, len(sentences)):
-            #     sentence = sentences[i]
-            #     similarity = score_spacy(sentence, question)
-            #     print(similarity)
-            #     scoreList.append((similarity, sentence))
-                
-            # scoreList.sort(reverse=True)
-            # q_type = question_type(question)
-            # s = scoreList[0][1]
-            # answer = s
-            answer = score_short(sentences, question)
-        else:
-            answer = score_short(sentences, question)
+        
+        # scoreList = []
+        # for i in range(0, len(sentences)):
+        #     sentence = sentences[i]
+        #     similarity = score_spacy(sentence, question)
+        #     print(similarity)
+        #     scoreList.append((similarity, sentence))
+            
+        # scoreList.sort(reverse=True)
+        # q_type = question_type(question)
+        # s = scoreList[0][1]
+        # answer = s
+        answer = score_short(sentences, question)
 
         if answer == None:
             tList.append("Default answer")
@@ -448,5 +453,5 @@ if __name__ == "__main__":
     # test_what()
     # test_match()
     # remove_clause()
-     #test_ask()
-    test_answer()
+    test_ask()
+    # test_answer()
