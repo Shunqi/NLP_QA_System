@@ -7,6 +7,7 @@ from ask_func.generate_question import *
 from ask_func.rank import *
 from answer_func.answer_question import *
 from ask_func.rank_questions import *
+import time
 
 def remove_clause_test():
     # paragraphs = open_txt('a7.txt')
@@ -275,7 +276,7 @@ def main():
     
 def test_ask():
     n = 10
-    paragraphs = open_txt('../../data/Development_data/set3/a5.txt')
+    paragraphs = open_txt('set3/a9.txt')
     sentences = tokenize_sentence(paragraphs)
     sentences = select_sentence(sentences, n)
     # sentences = [
@@ -319,24 +320,32 @@ def test_ask():
             s = remove_clause(s, pcfg)
             dep_list, pcfg = stanford_parser(s)
             word_Pos, Pos_word, NER, dep_dict, doc = Spacy_parser(s)
-
+			
             try:
+                t1 = time.time()
                 question = what_question(s, dep_list, pcfg, word_Pos, dep_dict)
                 if question != '':
                     question = format_question(question)
                     what_list.append(question)
+                t2 = time.time()
+                print("what: "+str(t2-t1))
+            	
             except:
                 traceback.print_exc()
 
             try:
-                question = create_how(s)
+                t1 = time.time()
+                question = create_how(doc, s)
                 if question != '':
                     question = format_question(question)
                     how_list.append(question)
+                t2 = time.time()
+                print("how: "+str(t2-t1))
             except:
                 traceback.print_exc()
 
             try:
+                t1 = time.time()
                 questions = create_when(s)
                 if questions != []:
                     for qt in questions:
@@ -350,6 +359,8 @@ def test_ask():
                             when_list.append((question, tag))
                         else:
                             where_list.append((question, tag))
+                t2 = time.time()
+                print("whenandwho: "+str(t2-t1))
             except:
                 traceback.print_exc()
 
@@ -383,8 +394,8 @@ def question_type(question):
         return question_type
 
 def test_answer():
-    questions = read_questions('/Users/wangjunjie/Downloads/handout-2/test_questions.txt')
-    paragraphs = open_txt('/Users/wangjunjie/Downloads/handout-2/data/set1/a1.txt')
+    questions = read_questions('question1.txt')
+    paragraphs = open_txt('set1/a4.txt')
     sentences = tokenize_sentence(paragraphs)
     aList = []
     tList = []
@@ -437,5 +448,5 @@ if __name__ == "__main__":
     # test_what()
     # test_match()
     # remove_clause()
-    # test_ask()
+     #test_ask()
     test_answer()
