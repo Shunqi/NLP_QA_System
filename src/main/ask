@@ -46,7 +46,7 @@ def main():
             pass
 
         for sen in senList:
-            print(sen)
+            # print(sen)
             if sen != sentence:
                 pcfg = stanford_pcfg(sen)
             s = remove_clause(sen, pcfg)

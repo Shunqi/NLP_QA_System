@@ -89,8 +89,8 @@ def main():
             aList.append(answer)
     
     for i in range(len(questions)):
-        print(questions[i])
-        print(tList[i])
+        # print(questions[i])
+        # print(tList[i])
         print(aList[i])
 
 if __name__ == "__main__":
