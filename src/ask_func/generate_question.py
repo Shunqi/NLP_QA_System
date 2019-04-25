@@ -447,6 +447,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     before_subj = []
     s_visited = False
     subj_visited = False
+    remove_index = -1
     
     # remove extra VP
     extra_vp = []
@@ -465,7 +466,11 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                     if word[0].isalnum():
                         remove += " "
                     remove += word
-                before_subj.append(remove.strip())
+                remove = remove.strip()
+                new_remove_index = sentence.find(remove) + len(remove)
+                if remove != "," and new_remove_index > remove_index:
+                    before_subj.append(remove.strip())
+                    remove_index = new_remove_index
         
         if tree.label() in ['CC', 'IN', ","]:
             prev = tree.leaves()[0]
@@ -494,7 +499,7 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
     for j in range(len(sentence)):
         if sentence[len(sentence) - 1 - j].isalnum():
             break
-    sentence = sentence[i:len(sentence) - 1 - j] + "."
+    sentence = sentence[i:len(sentence) - j] + "."
         
     # print(extra_vp)
 
