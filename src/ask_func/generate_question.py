@@ -462,22 +462,24 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
             else:
                 remove = ""
                 for word in tree.leaves():
-                    if word.isalnum():
+                    if word[0].isalnum():
                         remove += " "
                     remove += word
                 before_subj.append(remove.strip())
         
+        if tree.label() in ['CC', 'IN', ","]:
+            prev = tree.leaves()[0]
+        
         if tree.label() == "VP" and root_word not in tree.leaves():
             remove = ""
             for word in tree.leaves():
-                if word.isalnum():
+                if word[0].isalnum():
                     remove += " "
                 remove += word
-            if prev in [",", "and", "before", "after"]:
-                remove = prev + " " + remove
+            # if prev in [",", "and", "before", "after"]:
+            if prev != "":
+                remove = prev + remove
             extra_vp.append(remove.strip())
-            if len(tree.leaves()) != 1:
-                prev = tree.leaves()[0]
             
     for vp in extra_vp:
         sentence = sentence.replace(vp, "")
@@ -639,9 +641,8 @@ def create_when(sentence, dep_list, pcfg, dep_dict, doc):
                                 else:
                                     q_verb = " " + auxpass + " "
                         else:
-                            q_verb = get_tense(root_word)
+                            q_verb = get_tense(tag)
                             root_word_lemma = get_lemma(root_word)
-                            # print(q_verb, root_word, root_word_lemma, sep=":")
                                                         
                     
                     question += q_verb 
